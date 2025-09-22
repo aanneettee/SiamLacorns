@@ -85,29 +85,41 @@ Kinopoisk, IMDb: Общие базы данных по фильмам и сер�
 ## 2.1 Программные интерфейсы
 Для получения актуальной информации о сериалах (синопсис, актеры, даты выхода) будет использоваться API The Movie Database (TMDB), так как он обладает достаточно полной базой азиатских дорам.
 ## 2.2 Интерфейс пользователя
+
 Окно входа в приложение
 <img width="830" height="541" alt="image" src="https://github.com/user-attachments/assets/04635a1a-54ba-4ed6-8c1f-82fdc765f5c0" />
+
 Окно входа, если пользователь был зарегистрирован ранее
 <img width="832" height="537" alt="image" src="https://github.com/user-attachments/assets/fa73bd97-9a41-4043-81a7-adb45d44303f" />
+
 Окно регистрации при первом посещении сайта 
 <img width="830" height="538" alt="image" src="https://github.com/user-attachments/assets/b2f08d74-f83b-4b23-ae91-4dda1364c16a" />
+
 Главная страница сайта
 <img width="831" height="537" alt="image" src="https://github.com/user-attachments/assets/f59686d2-dfbc-46b6-94e5-c3c1a3e878aa" />
+
 Окно меню
 <img width="829" height="538" alt="image" src="https://github.com/user-attachments/assets/381bce18-a455-416d-9da7-9db8a0430d76" />
+
 Страница профиля
 <img width="832" height="538" alt="image" src="https://github.com/user-attachments/assets/4a5a277c-6bcf-4cb8-976a-4bff41fd9a6d" />
+
 Страница для помощи с ориентацией по странице 
 <img width="834" height="540" alt="image" src="https://github.com/user-attachments/assets/6e6cedeb-1ca8-4138-8fa3-3f9b313dce09" />
+
 Страница с информацией о сериале и самим сериалом 
 <img width="828" height="536" alt="image" src="https://github.com/user-attachments/assets/4e9dfa99-02eb-4ca7-bf7e-f3a29a51e48b" />
 <img width="829" height="537" alt="image" src="https://github.com/user-attachments/assets/288fe855-8ccf-4494-a761-d1bd3cb3dd6e" />
+
 Просмотр коллекций из раздела меню 
 <img width="833" height="538" alt="image" src="https://github.com/user-attachments/assets/46e0f15c-6e4c-47ec-9934-050e492cb0b3" />
+
 Страница с запросом о выходе
 <img width="830" height="538" alt="image" src="https://github.com/user-attachments/assets/79365814-35f1-4495-a46b-11c027b43182" />
+
 Страница выхода
 <img width="830" height="537" alt="image" src="https://github.com/user-attachments/assets/b5de69af-30ce-455b-835f-c2ca1cefd77e" />
+
 ## 2.3 Характеристика пользователей
 ### 2.3.1 Классы пользователей
 | Класс пользователей | Описание |
