@@ -5,9 +5,9 @@ SiamLacorns is a web service for watching Thai, Korean and Chinese TV series onl
 Language: Java.
 Interface language: React.
 
-[SRS of program]()
+[SRS of program](/Documentation/Requirements/SRS.md)
 
-[User interface images]()
+[User interface images](Documentation/Mockups)
 
 Diagrams
 
