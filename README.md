@@ -6,11 +6,17 @@ Language: Java.
 Interface language: React.
 
 [SRS of program]()
+
 [User interface images]()
+
 Diagrams
+
 Java code
+
 React code
+
 [Test plan]()
+
 [Test result]()
 
 
