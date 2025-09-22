@@ -15,8 +15,8 @@ Java code
 
 React code
 
-[Test plan]()
+[Test plan](/Test-plan.md)
 
-[Test result]()
+[Test result](/Test-results.md)
 
 
