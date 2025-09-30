@@ -13,4 +13,5 @@
 <img width="477" height="771" alt="image" src="https://github.com/user-attachments/assets/cef2937e-cd9d-4d74-aca5-5e0ade8456a2" />
 
 ## Выход из сайта
+<img width="958" height="746" alt="image" src="https://github.com/user-attachments/assets/72608b1d-7e50-4a34-a71c-15fe1c3184ce" />
 
