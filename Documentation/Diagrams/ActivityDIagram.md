@@ -6,3 +6,6 @@
 ## Регистрация пользователя
 <img width="595" height="656" alt="image" src="https://github.com/user-attachments/assets/97739a83-2aab-4962-8cd1-167c018af0ec" />
 
+## Добавление сериала в коллекцию
+<img width="371" height="475" alt="image" src="https://github.com/user-attachments/assets/2906d748-51a3-4518-8ad3-adddde84c40b" />
+
