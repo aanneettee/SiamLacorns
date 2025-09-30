@@ -1,4 +1,4 @@
 # Диаграмы состояний
 
 ## Вход в учётную запись
-<img width="1026" height="746" alt="image" src="https://github.com/user-attachments/assets/b75871d3-6762-4610-863b-f06b5f87690c" />
+<img width="981" height="728" alt="image" src="https://github.com/user-attachments/assets/4c053601-bb9f-4a6b-9c4a-f6415a8cc27f" />
