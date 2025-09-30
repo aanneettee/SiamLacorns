@@ -6,5 +6,7 @@
 ## Открытие меню 
 <img width="534" height="769" alt="image" src="https://github.com/user-attachments/assets/efe618e3-b34c-485d-8645-fcf8c57d32ec" />
 
-## Переход на страницу профиля
-<img width="487" height="733" alt="image" src="https://github.com/user-attachments/assets/689add08-c991-4c87-8167-795b7f385d1f" />
+## Переход из меню
+<img width="1035" height="623" alt="image" src="https://github.com/user-attachments/assets/9d0ba155-5a4b-403c-a58b-6485e46c4eba" />
+
+## Выход из сайта
