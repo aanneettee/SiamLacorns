@@ -10,3 +10,4 @@
 <img width="1041" height="629" alt="image" src="https://github.com/user-attachments/assets/b766f4e7-28c5-45cb-a9af-282894b731f6" />
 
 ## Добавление в коллекцию
+<img width="918" height="519" alt="image" src="https://github.com/user-attachments/assets/b13c6218-6afd-468c-9e3e-2eb88e0bb2d9" />
