@@ -1,0 +1,608 @@
+/* Home.css */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+.home-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8d8f0, #c1e3f7);
+  font-family: 'Comic Neue', cursive;
+  padding: 0;
+}
+
+/* Стили для модального окна меню - ПЕРЕНЕСЕНО В НАЧАЛО */
+.menu-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.menu-modal {
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.menu-modal-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 2rem 0;
+  font-family: 'Comic Neue', cursive;
+}
+
+.menu-modal-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.menu-modal-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.menu-modal-button {
+  padding: 0.8rem 1.2rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+  text-align: center;
+  text-decoration: none;
+}
+
+.menu-modal-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.menu-modal-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+.menu-modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.leave-page-button {
+  padding: 0.8rem 2rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.leave-page-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.leave-page-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+/* Анимация появления модального окна */
+.menu-modal {
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Хедер */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-bottom: 0;
+}
+
+.cat-help-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-cat {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.help-bubble {
+  background: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 20px;
+  border: 3px solid #000000;
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+  min-width: 140px;
+}
+
+.help-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid white;
+}
+
+.help-bubble::after {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 19px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 11px solid #000000;
+  z-index: -1;
+}
+
+.help-bubble p {
+  margin: 0.2rem 0;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.help-link {
+  color: #3498db;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.help-link:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.5rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.menu-icon {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 18px;
+  height: 10px;
+  position: relative;
+}
+
+.menu-line {
+  width: 100%;
+  height: 2px;
+  background-color: #000000;
+  transition: all 0.2s ease;
+  transform-origin: center;
+}
+
+.menu-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+/* Основной контент */
+.home-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Заголовок сайта */
+.site-title-section {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.main-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  letter-spacing: 1px;
+  line-height: 1;
+  padding: 0.5rem 0 0 0;
+}
+
+.divider-line {
+  height: 4px;
+  background: #000000;
+  margin: 0.3rem 0.5rem 1.5rem 0.5rem;
+  border-radius: 2px;
+}
+
+/* Поиск */
+.search-section {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.search-input {
+  width: 100%;
+  max-width: 500px;
+  padding: 1rem 1.5rem;
+  border: 3px solid #000000;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-family: 'Comic Neue', cursive;
+  background: white;
+  transition: all 0.3s ease;
+  box-shadow: 4px 4px 0px #000000;
+  outline: none;
+  position: relative;
+}
+
+.search-input::placeholder {
+  color: #bdc3c7;
+  font-family: 'Comic Neue', cursive;
+  opacity: 0.8;
+}
+
+.search-input:focus {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+
+/* ФИЛЬТРЫ - ПОЛНОСТЬЮ ПЕРЕДЕЛАННАЯ СЕКЦИЯ */
+.filters-section {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 2rem auto;
+  max-width: 900px;
+  padding: 0 1rem;
+}
+
+.filters-main-container {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-group {
+  position: relative;
+  min-width: 120px;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: 'Comic Neue', cursive;
+  background: white;
+  cursor: pointer;
+  appearance: none;
+  box-shadow: 3px 3px 0px #000000;
+  transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+  outline: none;
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0px #000000;
+}
+
+.filter-group::after {
+  content: '▼';
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #000000;
+  pointer-events: none;
+  font-size: 0.8rem;
+}
+
+/* КНОПКИ ФИЛЬТРОВ - ОДИНАКОВЫЕ СТИЛИ */
+.filter-button {
+  width: 45px;
+  min-width: 45px;
+  height: 45px;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  background: white;
+  color: #000000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 3px 3px 0px #000000;
+  font-size: 1.5rem;
+  padding: 0;
+}
+
+/* ОДИНАКОВАЯ АНИМАЦИЯ ДЛЯ ВСЕХ КНОПОК */
+.filter-button:hover,
+.filter-select:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0px #000000;
+  background: #f8f9fa;
+}
+
+.filter-button:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+/* Популярные лакорны */
+.popular-section {
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.popular-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 1rem;
+  text-align: left;
+  margin-left: calc(1rem + 2rem);
+  padding-left: 0;
+}
+
+.lacorns-frame {
+  border: 4px solid #000000;
+  border-radius: 12px;
+  padding: 2rem;
+  background: transparent;
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+}
+
+.lacorns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+.lacorn-item {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.lacorn-item:hover {
+  transform: translateY(-5px);
+}
+
+.lacorn-poster {
+  position: relative;
+  height: 240px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+.lacorn-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.lacorn-item:hover .lacorn-poster img {
+  transform: scale(1.05);
+}
+
+.lacorn-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+  display: flex;
+  align-items: flex-end;
+  padding: 0.8rem;
+}
+
+.lacorn-rating {
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.lacorn-title {
+  margin: 0.5rem 0 0.2rem 0;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.lacorn-year {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .home-header {
+    padding: 0.5rem;
+  }
+
+  .main-title {
+    font-size: 2.5rem;
+    padding: 0.3rem 0 0 0;
+  }
+
+  .divider-line {
+    margin: 0.3rem 0.5rem 1.5rem 0.5rem;
+  }
+
+  .filters-main-container {
+    gap: 0.6rem;
+    justify-content: center;
+  }
+
+  .filter-group {
+    min-width: 110px;
+  }
+
+  .filter-select {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  /* Адаптация модального окна для мобильных */
+  .menu-modal-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .menu-modal {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 2rem;
+    padding: 0.2rem 0 0 0;
+  }
+
+  .search-input {
+    padding: 0.8rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .filters-main-container {
+    gap: 0.5rem;
+  }
+
+  .filter-group {
+    min-width: 100px;
+  }
+
+  .filter-select {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+  .filter-button {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
+
+  .lacorns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .lacorn-poster {
+    height: 160px;
+  }
+
+  .help-bubble {
+    min-width: 120px;
+    padding: 0.6rem 1rem;
+  }
+
+  .help-bubble p {
+    font-size: 0.8rem;
+  }
+
+  .lacorns-frame {
+    padding: 1rem;
+  }
+
+  .divider-line {
+    margin: 0.2rem 0.3rem 1rem 0.3rem;
+  }
+
+  .menu-button {
+    padding: 0.5rem 1rem;
+    gap: 0.4rem;
+  }
+
+  .menu-modal {
+    padding: 1rem;
+  }
+
+  .menu-modal-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}

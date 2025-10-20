@@ -1,0 +1,326 @@
+/* Login.css */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8d8f0, #c1e3f7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  font-family: 'Comic Neue', cursive;
+  width: 100vw;
+  height: 100vh;
+}
+
+.login-title {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 2rem;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  width: 100%;
+  max-width: 500px;
+}
+
+.form-columns {
+  display: flex;
+  gap: 3rem;
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+  max-width: 280px;
+}
+
+.form-group {
+  width: 100%;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #000000;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: left;
+  width: 100%;
+  padding-left: 0.5rem;
+}
+
+.input-container {
+  position: relative;
+  width: 100%;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-family: 'Comic Neue', cursive;
+  background: rgba(255, 255, 255, 0.95);
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 4px 4px 0px #000000;
+  border-style: solid;
+  text-align: left;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #000000;
+  background: white;
+  box-shadow: 4px 4px 0px #000000;
+  transform: translateY(-2px);
+}
+
+.form-input::placeholder {
+  color: #666666;
+  font-family: 'Comic Neue', cursive;
+  opacity: 0.7;
+  text-align: left;
+}
+
+.check-button {
+  padding: 0.8rem 2.5rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+  margin-top: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.check-button:hover:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.check-button:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+.check-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.login-error {
+  background: linear-gradient(135deg, #ffeaea, #ffcccc);
+  color: #d63031;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 3px solid #fab1a0;
+  font-weight: 600;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.login-success {
+  background: linear-gradient(135deg, #e8f6ef, #d1f2eb);
+  color: #27ae60;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 3px solid #a3e4d7;
+  font-weight: 600;
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.cat-dialog {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.cat-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.dialog-bubble {
+  background: white;
+  padding: 1.2rem 1.8rem;
+  border-radius: 25px;
+  border: 3px solid #000000;
+  position: relative;
+  max-width: 260px;
+  min-width: 240px;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+.dialog-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  bottom: 25px;
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-right: 12px solid white;
+}
+
+.dialog-bubble::after {
+  content: '';
+  position: absolute;
+  left: -13px;
+  bottom: 24px;
+  width: 0;
+  height: 0;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-right: 13px solid #000000;
+  z-index: -1;
+}
+
+.dialog-bubble p {
+  margin: 0.4rem 0;
+  color: #000000;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  font-weight: 600;
+  text-align: left;
+}
+
+.dialog-link {
+  color: #3498db;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.dialog-link:hover {
+  color: #2980b9;
+  text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .login-page {
+    padding: 1rem;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .login-title {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .login-form {
+    gap: 2rem;
+  }
+
+  .form-columns {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-column {
+    max-width: 100%;
+  }
+
+  .cat-dialog {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    margin-top: 2rem;
+    justify-content: center;
+  }
+
+  .dialog-bubble {
+    max-width: 220px;
+    min-width: 200px;
+    padding: 1rem 1.5rem;
+  }
+
+  .check-button {
+    padding: 0.7rem 2rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-input {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+
+  .check-button {
+    padding: 0.6rem 1.8rem;
+    font-size: 0.95rem;
+  }
+
+  .cat-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .input-label {
+    font-size: 1rem;
+    padding-left: 0.25rem;
+  }
+
+  .dialog-bubble {
+    max-width: 200px;
+    min-width: 180px;
+    padding: 0.9rem 1.3rem;
+  }
+
+  .dialog-bubble p {
+    font-size: 0.9rem;
+  }
+}

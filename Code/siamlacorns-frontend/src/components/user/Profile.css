@@ -1,0 +1,749 @@
+/* Profile.css - улучшенная версия с анимациями для аватара */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+.profile-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8d8f0, #c1e3f7);
+  font-family: 'Comic Neue', cursive;
+  padding: 1rem;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.profile-main {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Левая колонка - информация пользователя */
+.profile-left {
+  flex: 0 0 350px;
+  padding-right: 2rem;
+  border-right: 3px solid #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Секция аватара */
+.profile-avatar-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.profile-avatar-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Обертка для аватара */
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.avatar-wrapper.editing {
+  transform: scale(1.02);
+}
+
+.profile-avatar {
+  width: 200px;
+  height: 200px;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  background: white;
+  object-fit: cover;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.3s ease;
+}
+
+.avatar-wrapper.editing .profile-avatar {
+  filter: blur(2px) brightness(0.7);
+  transform: scale(1.05);
+}
+
+/* Оверлей для аватара в режиме редактирования */
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 9px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-wrapper.editing .avatar-overlay {
+  opacity: 1;
+}
+
+/* Кнопка изменения фото (появляется только в режиме редактирования) */
+.avatar-change-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000000;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 0 #000000;
+  opacity: 0;
+  visibility: hidden;
+  min-width: 140px;
+  text-align: center;
+}
+
+.avatar-wrapper.editing .avatar-change-button {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.avatar-change-button:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+  background: white;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.change-icon {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.avatar-upload-input {
+  display: none;
+}
+
+/* Контейнер для полей информации */
+.profile-info-fields {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Поля информации - выровнены по левому краю */
+.profile-info-field {
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 3px 3px 0px #000000;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.profile-info-field:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px #000000;
+}
+
+.left-aligned {
+  justify-content: flex-start;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.profile-info-text {
+  color: #000000;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  font-family: 'Comic Neue', cursive;
+  width: 100%;
+}
+
+.profile-info-input {
+  border: none;
+  background: transparent;
+  width: 100%;
+  font-family: 'Comic Neue', cursive;
+  font-size: 1.1rem;
+  font-weight: 700;
+  outline: none;
+  color: #000000;
+}
+
+.profile-info-input::placeholder {
+  color: #999;
+}
+
+/* Контейнер для кнопок действий */
+.profile-action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.change-info-button {
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.change-info-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.change-info-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+/* Кнопки в режиме редактирования */
+.editing-buttons {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.save-button {
+  flex: 2;
+  padding: 1rem;
+  background: #4CAF50;
+  color: white;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.save-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #45a049;
+}
+
+.cancel-button {
+  flex: 1;
+  padding: 1rem;
+  background: #ff6b6b;
+  color: white;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.cancel-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #ff5252;
+}
+
+/* Правая колонка - контент */
+.profile-right {
+  flex: 1;
+}
+
+.cat-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.profile-cat {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #000000;
+}
+
+.cat-bubble {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 20px;
+  border: 3px solid #000000;
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+  min-width: 200px;
+}
+
+.cat-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid white;
+}
+
+.cat-bubble::after {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 19px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 11px solid #000000;
+  z-index: -1;
+}
+
+.cat-bubble p {
+  margin: 0.3rem 0;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Кнопки действий */
+.profile-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.profile-action-button {
+  padding: 0.8rem 1.5rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+  flex: 1;
+  min-width: 120px;
+}
+
+.profile-action-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.profile-action-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+/* Секция последних просмотренных */
+.last-watched-section {
+  margin-top: 2rem;
+}
+
+.last-watched-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 1rem;
+}
+
+.last-watched-frame {
+  border: 4px solid #000000;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: transparent;
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+  height: 400px;
+  overflow-y: auto;
+}
+
+.last-watched-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.watched-lacorn-item {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.watched-lacorn-item:hover {
+  transform: translateY(-5px);
+}
+
+.watched-lacorn-poster {
+  position: relative;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+.watched-lacorn-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.watched-lacorn-item:hover .watched-lacorn-poster img {
+  transform: scale(1.05);
+}
+
+.watched-lacorn-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+  display: flex;
+  align-items: flex-end;
+  padding: 0.6rem;
+}
+
+.watched-lacorn-rating {
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.watched-lacorn-title {
+  margin: 0.5rem 0 0.2rem 0;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.watched-lacorn-year {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  margin: 0;
+  text-align: center;
+}
+
+/* Модальное окно */
+.menu-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.menu-modal {
+  background: white;
+  border: 3px solid #000000;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 500px;
+  max-width: 90vw;
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.menu-modal-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 2rem 0;
+  font-family: 'Comic Neue', cursive;
+}
+
+.menu-modal-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.menu-modal-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.menu-modal-button {
+  padding: 0.8rem 1.2rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+  text-align: center;
+  text-decoration: none;
+}
+
+.menu-modal-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.menu-modal-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+.menu-modal-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.leave-page-button {
+  padding: 0.8rem 2rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.leave-page-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
+
+.leave-page-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+.menu-modal {
+  animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.avatar-change-button {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .profile-main {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .profile-left {
+    flex: none;
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 3px solid #000000;
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    align-items: center;
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-info-fields {
+    width: 100%;
+  }
+
+  .editing-buttons {
+    flex-direction: column;
+  }
+
+  .profile-actions {
+    justify-content: center;
+  }
+
+  .profile-action-button {
+    flex: none;
+    min-width: 140px;
+  }
+
+  .cat-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .last-watched-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .menu-modal-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .menu-modal {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding: 0.5rem;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-info-field {
+    padding: 0.8rem;
+    min-height: 50px;
+  }
+
+  .profile-info-text {
+    font-size: 1rem;
+  }
+
+  .last-watched-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .watched-lacorn-poster {
+    height: 180px;
+  }
+
+  .menu-modal {
+    padding: 1rem;
+  }
+
+  .menu-modal-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh;
+    gap: 1rem;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #000000;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .loading-container p {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #000000;
+    font-family: 'Comic Neue', cursive;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Анимация появления контента после загрузки */
+  .profile-main {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

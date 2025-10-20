@@ -1,0 +1,93 @@
+.episode-player {
+  background: #1a1a1a;
+  color: white;
+  min-height: 100vh;
+}
+
+.back-button {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.back-button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.player-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.video-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.video-player {
+  width: 100%;
+  height: 600px;
+  background: black;
+  border-radius: 8px;
+}
+
+.episode-info {
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.episode-info h2 {
+  margin-bottom: 0.5rem;
+  color: #3498db;
+}
+
+.player-controls {
+  padding: 0 1rem;
+}
+
+.progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progress-slider {
+  flex: 1;
+  height: 6px;
+  background: #34495e;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #3498db;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.time-display {
+  font-size: 0.9rem;
+  color: #bdc3c7;
+  min-width: 100px;
+}
+
+@media (max-width: 768px) {
+  .video-player {
+    height: 300px;
+  }
+
+  .player-container {
+    padding: 1rem;
+  }
+}

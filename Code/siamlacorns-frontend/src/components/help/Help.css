@@ -1,0 +1,67 @@
+/* src/components/help/Help.css */
+.help-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8d8f0, #c1e3f7);
+  font-family: 'Comic Neue', cursive;
+  padding: 2rem;
+}
+
+.help-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 3px solid #000000;
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+}
+
+.help-container h1 {
+  color: #000000;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+}
+
+.help-sections {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.help-section {
+  padding: 1.5rem;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.help-section h2 {
+  color: #000000;
+  margin-bottom: 0.5rem;
+}
+
+.help-section p {
+  color: #7f8c8d;
+  line-height: 1.5;
+}
+
+.back-home-button {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background: white;
+  color: #000000;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  font-family: 'Comic Neue', cursive;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.back-home-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background: #f8f9fa;
+}
