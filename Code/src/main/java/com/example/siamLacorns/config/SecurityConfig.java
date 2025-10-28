@@ -49,27 +49,26 @@ public class SecurityConfig {
 
     @Configuration
     public class WebConfig implements WebMvcConfigurer {
-
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
-            // Разрешаем доступ к файлам по пути /uploads/**
+            // Исправленный путь к статическим ресурсам
             registry.addResourceHandler("/uploads/**")
-                    .addResourceLocations("file:uploads/");
+                    .addResourceLocations("classpath:/static/uploads/");
         }
     }
 
-    // SecurityConfig.java - ВРЕМЕННО для тестирования
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
+                        .requestMatchers("/uploads/**").permitAll() // Разрешить доступ к статическим ресурсам
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/users/register").permitAll() // регистрация
-                        .requestMatchers("/api/users/me").authenticated() // ✅ ДОБАВЬТЕ
+                        .requestMatchers("/api/users/register").permitAll()
+                        .requestMatchers("/api/users/me").authenticated()
                         .requestMatchers("/api/users/profile").authenticated()
-                        .requestMatchers("/api/users/avatar").authenticated()// профиль
+                        .requestMatchers("/api/users/avatar").authenticated()
                         .requestMatchers("/api/users/{id}").authenticated()
                         .requestMatchers("/api/lacorns/**").permitAll()
                         .anyRequest().permitAll()
@@ -86,7 +85,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",  // ваш фронтенд порт
+                "http://localhost:3000",
                 "http://127.0.0.1:3000"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
@@ -95,7 +94,7 @@ public class SecurityConfig {
                 "Content-Type",
                 "X-Requested-With",
                 "Accept",
-                "X-User-Id",  // для вашего кастомного заголовка
+                "X-User-Id",
                 "Origin",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"
@@ -105,7 +104,7 @@ public class SecurityConfig {
                 "Content-Disposition"
         ));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L); // 1 hour
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

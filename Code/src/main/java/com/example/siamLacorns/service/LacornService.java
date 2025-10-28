@@ -1,32 +1,28 @@
 package com.example.siamLacorns.service;
 
-import com.example.siamLacorns.dto.EpisodeDTO;
-import com.example.siamLacorns.dto.LacornDTO;
-import com.example.siamLacorns.dto.WatchProgressDTO;
-import com.example.siamLacorns.dto.WatchRequestDTO;
+import com.example.siamLacorns.dto.*;
 import com.example.siamLacorns.exception.AuthenticationException;
 import com.example.siamLacorns.exception.ResourceNotFoundException;
 import com.example.siamLacorns.exception.ValidationException;
-import com.example.siamLacorns.model.Episode;
-import com.example.siamLacorns.model.Lacorn;
-import com.example.siamLacorns.model.User;
-import com.example.siamLacorns.model.UserWatchHistory;
-import com.example.siamLacorns.repository.EpisodeRepository;
-import com.example.siamLacorns.repository.LacornRepository;
-import com.example.siamLacorns.repository.UserRepository;
-import com.example.siamLacorns.repository.UserWatchHistoryRepository;
+import com.example.siamLacorns.model.*;
+import com.example.siamLacorns.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import com.example.siamLacorns.dto.EpisodeDTO;
+import com.example.siamLacorns.dto.WatchProgressDTO;
+import com.example.siamLacorns.dto.ActorDTO;
+import com.example.siamLacorns.dto.WatchRequestDTO;
 
 @Service
+@Transactional(readOnly = true)
 public class LacornService {
 
     @Autowired
@@ -41,27 +37,168 @@ public class LacornService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ActorRepository actorRepository;
+
+    @Transactional
+    public Lacorn importFromTMDB(TMDBLacornDTO tmdbData) {
+        // Проверяем, не существует ли уже сериал с таким tmdbId
+        Optional<Lacorn> existingLacorn = lacornRepository.findByTmdbId(tmdbData.getTmdbId());
+        if (existingLacorn.isPresent()) {
+            return existingLacorn.get();
+        }
+
+        // Создаем новый Lacorn из TMDB данных
+        Lacorn lacorn = new Lacorn();
+        lacorn.setTitle(tmdbData.getTitle());
+        lacorn.setDescription(tmdbData.getDescription());
+        lacorn.setReleaseYear(tmdbData.getReleaseYear());
+        lacorn.setTotalEpisodes(tmdbData.getTotalEpisodes());
+        lacorn.setEpisodeDuration(tmdbData.getEpisodeDuration());
+        lacorn.setPosterUrl(tmdbData.getPosterUrl());
+        lacorn.setTrailerUrl(tmdbData.getTrailerUrl());
+        lacorn.setGenres(tmdbData.getGenres());
+        lacorn.setAgeRating(tmdbData.getAgeRating());
+        lacorn.setRating(tmdbData.getRating());
+        lacorn.setTmdbId(tmdbData.getTmdbId());
+
+        // НОВОЕ: устанавливаем страны производства
+        lacorn.setProductionCountries(tmdbData.getProductionCountries());
+
+        // Конвертируем статус
+        if (tmdbData.getStatus() != null) {
+            switch (tmdbData.getStatus().toUpperCase()) {
+                case "RELEASED":
+                case "ENDED":
+                    lacorn.setStatus(Lacorn.SeriesStatus.COMPLETED);
+                    break;
+                case "RETURNING SERIES":
+                case "IN PRODUCTION":
+                    lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
+                    break;
+                case "PLANNED":
+                    lacorn.setStatus(Lacorn.SeriesStatus.UPCOMING);
+                    break;
+                default:
+                    lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
+            }
+        } else {
+            lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
+        }
+
+        Lacorn savedLacorn = lacornRepository.save(lacorn);
+
+        // НОВОЕ: сохраняем актёров
+        if (tmdbData.getActors() != null && !tmdbData.getActors().isEmpty()) {
+            for (ActorDTO actorDTO : tmdbData.getActors()) {
+                Actor actor = new Actor();
+                actor.setName(actorDTO.getName());
+                actor.setPhotoUrl(actorDTO.getPhotoUrl());
+                // Можно добавить дополнительную логику для поиска существующих актёров
+
+                Actor savedActor = actorRepository.save(actor);
+                savedLacorn.addActor(savedActor);
+            }
+            savedLacorn = lacornRepository.save(savedLacorn);
+        }
+
+        return savedLacorn;
+    }
+
     // Создание сериала
     @Transactional
     public Lacorn createLacorn(Lacorn lacorn) {
         try {
+            // Установка статуса по умолчанию если не задан
+            if (lacorn.getStatus() == null) {
+                lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
+            }
             return lacornRepository.save(lacorn);
         } catch (Exception e) {
             throw new ValidationException("Ошибка при создании сериала: " + e.getMessage());
         }
     }
 
-    // Получение сериала по ID с прогрессом просмотра (если пользователь авторизован)
-    public LacornDTO getLacornById(Long lacornId, Long userId) {
+    @Transactional
+    public Lacorn addActorToLacorn(Long lacornId, Long actorId) {
         Lacorn lacorn = lacornRepository.findById(lacornId)
                 .orElseThrow(() -> new ResourceNotFoundException("Сериал не найден с ID: " + lacornId));
-        return convertToDTO(lacorn, userId);
+
+        Actor actor = actorRepository.findById(actorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Актёр не найден с ID: " + actorId));
+
+        lacorn.addActor(actor);
+        return lacornRepository.save(lacorn);
+    }
+
+    @Transactional
+    public Lacorn removeActorFromLacorn(Long lacornId, Long actorId) {
+        Lacorn lacorn = lacornRepository.findById(lacornId)
+                .orElseThrow(() -> new ResourceNotFoundException("Сериал не найден с ID: " + lacornId));
+
+        Actor actor = actorRepository.findById(actorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Актёр не найден с ID: " + actorId));
+
+        lacorn.removeActor(actor);
+        return lacornRepository.save(lacorn);
+    }
+
+    @Transactional
+    public Actor createActor(Actor actor) {
+        try {
+            return actorRepository.save(actor);
+        } catch (Exception e) {
+            throw new ValidationException("Ошибка при создании актёра: " + e.getMessage());
+        }
+    }
+
+    // Метод для получения актёров лако́рна
+    public List<ActorDTO> getActorsByLacornId(Long lacornId) {
+        List<Actor> actors = actorRepository.findByLacornId(lacornId);
+        return actors.stream()
+                .map(this::convertToActorDTO)
+                .collect(Collectors.toList());
+    }
+
+    // Получение сериала по ID с прогрессом просмотра (если пользователь авторизован)
+    @Transactional
+    public LacornDTO getLacornById(Long id, Long userId) {
+        try {
+            Lacorn lacorn = lacornRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Сериал не найден с ID: " + id));
+
+            LacornDTO lacornDTO = new LacornDTO(lacorn);
+
+            // Добавляем эпизоды
+            List<EpisodeDTO> episodeDTOs = getEpisodesByLacornId(id, userId);
+            lacornDTO.setEpisodes(episodeDTOs);
+
+            // Добавляем актеров
+            List<ActorDTO> actorDTOs = getActorsByLacornId(id);
+            lacornDTO.setActors(actorDTOs);
+
+            // Добавляем прогресс просмотра, если пользователь авторизован
+            if (userId != null) {
+                try {
+                    WatchProgressDTO progress = getWatchProgress(userId, id);
+                    lacornDTO.setWatchProgress(progress);
+                } catch (Exception e) {
+                    // Игнорируем ошибки прогресса, так как они не критичны
+                    System.out.println("Error loading watch progress: " + e.getMessage());
+                }
+            }
+
+            return lacornDTO;
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при загрузке сериала: " + e.getMessage(), e);
+        }
     }
 
     // Получение всех сериалов с пагинацией
     public Page<LacornDTO> getAllLacorns(Pageable pageable, Long userId) {
-        return lacornRepository.findAll(pageable)
-                .map(lacorn -> convertToDTO(lacorn, userId));
+        // Используем метод с JOIN FETCH
+        Page<Lacorn> lacorns = lacornRepository.findAllWithGenres(pageable);
+        return lacorns.map(lacorn -> convertToDTO(lacorn, userId));
     }
 
     // Поиск сериалов по названию
@@ -69,7 +206,7 @@ public class LacornService {
         if (query == null || query.trim().isEmpty()) {
             throw new ValidationException("Поисковый запрос не может быть пустым");
         }
-        return lacornRepository.findByTitleContainingIgnoreCase(query, pageable)
+        return lacornRepository.findByTitleContainingIgnoreCaseWithGenres(query, pageable)
                 .map(lacorn -> convertToDTO(lacorn, userId));
     }
 
@@ -143,6 +280,8 @@ public class LacornService {
                 .collect(Collectors.toList());
     }
 
+
+
     // Получение продолжаемых просмотров
     public List<WatchProgressDTO> getInProgress(Long userId) {
         if (userId == null) {
@@ -182,32 +321,55 @@ public class LacornService {
 
     // Конвертация Entity в DTO
     private LacornDTO convertToDTO(Lacorn lacorn, Long userId) {
-        LacornDTO dto = new LacornDTO(
-                lacorn.getId(),
-                lacorn.getTitle(),
-                lacorn.getDescription(),
-                lacorn.getReleaseYear(),
-                lacorn.getTotalEpisodes(),
-                lacorn.getEpisodeDuration()
-        );
+        LacornDTO dto = new LacornDTO(lacorn);
 
+        dto.setId(lacorn.getId());
+        dto.setTitle(lacorn.getTitle());
+        dto.setDescription(lacorn.getDescription());
+        dto.setReleaseYear(lacorn.getReleaseYear());
+        dto.setTotalEpisodes(lacorn.getTotalEpisodes());
+        dto.setEpisodeDuration(lacorn.getEpisodeDuration());
         dto.setPosterUrl(lacorn.getPosterUrl());
         dto.setTrailerUrl(lacorn.getTrailerUrl());
-        dto.setGenres(lacorn.getGenres());
+        dto.setGenres(lacorn.getGenres() != null ? new ArrayList<>(lacorn.getGenres()) : new ArrayList<>());
         dto.setAgeRating(lacorn.getAgeRating());
         dto.setRating(lacorn.getRating());
-
+        dto.setStatus(lacorn.getStatus() != null ? lacorn.getStatus().name() : "ONGOING");
         // Получаем прогресс просмотра, если пользователь авторизован
         if (userId != null) {
             watchHistoryRepository.findByUserIdAndLacornId(userId, lacorn.getId())
                     .ifPresent(history -> dto.setWatchProgress(convertToWatchProgressDTO(history)));
         }
 
-        // Конвертируем эпизоды
-        List<EpisodeDTO> episodeDTOs = lacorn.getEpisodes().stream()
-                .map(episode -> convertToEpisodeDTO(episode, userId))
-                .collect(Collectors.toList());
+        // Безопасная конвертация эпизодов
+        List<EpisodeDTO> episodeDTOs = new ArrayList<>();
+        if (lacorn.getEpisodes() != null && !lacorn.getEpisodes().isEmpty()) {
+            episodeDTOs = lacorn.getEpisodes().stream()
+                    .map(episode -> convertToEpisodeDTO(episode, userId))
+                    .collect(Collectors.toList());
+        }
         dto.setEpisodes(episodeDTOs);
+
+        // Безопасная конвертация актеров
+        List<ActorDTO> actorDTOs = new ArrayList<>();
+        if (lacorn.getActors() != null && !lacorn.getActors().isEmpty()) {
+            actorDTOs = lacorn.getActors().stream()
+                    .map(this::convertToActorDTO)
+                    .collect(Collectors.toList());
+        }
+        dto.setActors(actorDTOs);
+
+        // Безопасное получение доступных озвучек
+        List<String> allVoiceovers = new ArrayList<>();
+        if (lacorn.getEpisodes() != null && !lacorn.getEpisodes().isEmpty()) {
+            allVoiceovers = lacorn.getEpisodes().stream()
+                    .flatMap(episode -> episode.getAvailableVoiceovers() != null ?
+                            episode.getAvailableVoiceovers().stream().map(Enum::name) :
+                            Stream.empty())
+                    .distinct()
+                    .collect(Collectors.toList());
+        }
+        dto.setAvailableVoiceovers(allVoiceovers);
 
         return dto;
     }
@@ -224,6 +386,9 @@ public class LacornService {
         dto.setDescription(episode.getDescription());
         dto.setDuration(episode.getDuration());
         dto.setThumbnailUrl(episode.getThumbnailUrl());
+        dto.setAvailableVoiceovers(episode.getAvailableVoiceovers() != null ?
+                episode.getAvailableVoiceovers().stream().map(Enum::name).collect(Collectors.toList()) :
+                new ArrayList<>());
 
         // Проверяем статус просмотра, если пользователь авторизован
         if (userId != null) {
@@ -278,9 +443,56 @@ public class LacornService {
         lacorn.setGenres(lacornDetails.getGenres());
         lacorn.setAgeRating(lacornDetails.getAgeRating());
         lacorn.setRating(lacornDetails.getRating());
-        lacorn.preUpdate(); // Обновляем время изменения
+        lacorn.setStatus(lacornDetails.getStatus()); // Добавить эту строку
+        lacorn.preUpdate();
 
         return lacornRepository.save(lacorn);
+    }
+
+    public List<Episode.VoiceoverType> getEpisodeVoiceovers(Long episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Эпизод не найден с ID: " + episodeId));
+
+        return episode.getAvailableVoiceovers() != null ?
+                episode.getAvailableVoiceovers() :
+                new ArrayList<>();
+    }
+
+    @Transactional
+    public Episode addVoiceoverToEpisode(Long episodeId, Episode.VoiceoverType voiceoverType) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Эпизод не найден с ID: " + episodeId));
+
+        if (episode.getAvailableVoiceovers() == null) {
+            episode.setAvailableVoiceovers(new ArrayList<>());
+        }
+
+        if (!episode.getAvailableVoiceovers().contains(voiceoverType)) {
+            episode.getAvailableVoiceovers().add(voiceoverType);
+        }
+
+        return episodeRepository.save(episode);
+    }
+
+    // В LacornService.java
+    public String generateVideoUrl(Long episodeId, String voicecoverType) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new RuntimeException("Episode not found with id: " + episodeId));
+
+        // Базовая логика - возвращаем URL из эпизода
+        String baseUrl = episode.getVideoUrl();
+
+        if (baseUrl == null || baseUrl.trim().isEmpty()) {
+            // Fallback URL если нет основного URL
+            return "/videos/episode_" + episodeId + "_" + voicecoverType.toLowerCase() + ".mp4";
+        }
+
+        // Добавляем параметры озвучки к URL если нужно
+        return switch (voicecoverType.toLowerCase()) {
+            case "dubbed" -> baseUrl + "?audio=dubbed";
+            case "subbed" -> baseUrl + "?audio=original&subtitles=en";
+            default -> baseUrl;
+        };
     }
 
     @Transactional
@@ -290,5 +502,56 @@ public class LacornService {
 
         lacornRepository.delete(lacorn);
         return true;
+    }
+
+    private ActorDTO convertToActorDTO(Actor actor) {
+        ActorDTO dto = new ActorDTO();
+        dto.setId(actor.getId());
+        dto.setName(actor.getName());
+        dto.setBiography(actor.getBiography());
+        dto.setPhotoUrl(actor.getPhotoUrl());
+        dto.setBirthDate(actor.getBirthDate());
+        dto.setNationality(actor.getNationality());
+        return dto;
+    }
+    // LacornService.java - альтернативный метод
+    public Page<LacornDTO> getAllLacornsByRatingDesc(Pageable pageable, Long userId) {
+        Page<Lacorn> lacorns = lacornRepository.findAll(pageable);
+        return lacorns.map(lacorn -> convertToDTO(lacorn, userId));
+    }
+
+    // Получение топ-N сериалов по рейтингу
+    public List<LacornDTO> getTopRatedLacorns(int limit, Long userId) {
+        List<Lacorn> lacorns;
+        if (limit > 0) {
+            // Используем Pageable для ограничения количества
+            Pageable pageable = PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "rating"));
+            lacorns = lacornRepository.findAll(pageable).getContent();
+        } else {
+            lacorns = lacornRepository.findAllByOrderByRatingDesc();
+        }
+
+        return lacorns.stream()
+                .map(lacorn -> convertToDTO(lacorn, userId))
+                .collect(Collectors.toList());
+    }
+
+    // Поиск с сортировкой по рейтингу
+    public Page<LacornDTO> searchLacornsByRating(String query, Pageable pageable, Long userId) {
+        if (query == null || query.trim().isEmpty()) {
+            return getAllLacornsByRatingDesc(pageable, userId);
+        }
+        return lacornRepository.findByTitleContainingIgnoreCaseOrderByRatingDesc(query, pageable)
+                .map(lacorn -> convertToDTO(lacorn, userId));
+    }
+
+    // Получение по жанру с сортировкой по рейтингу
+    public List<LacornDTO> getLacornsByGenreByRating(String genre, Long userId) {
+        if (genre == null || genre.trim().isEmpty()) {
+            return getTopRatedLacorns(0, userId); // Все сериалы, отсортированные по рейтингу
+        }
+        return lacornRepository.findByGenresContainingOrderByRatingDesc(genre).stream()
+                .map(lacorn -> convertToDTO(lacorn, userId))
+                .collect(Collectors.toList());
     }
 }

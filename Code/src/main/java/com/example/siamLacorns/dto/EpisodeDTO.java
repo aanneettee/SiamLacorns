@@ -1,5 +1,8 @@
 package com.example.siamLacorns.dto;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class EpisodeDTO {
     private Long id;
     private String title;
@@ -11,6 +14,7 @@ public class EpisodeDTO {
     private String thumbnailUrl;
     private boolean watched;
     private Integer currentTime;
+    private List<String> availableVoiceovers;
 
     // Конструкторы, геттеры и сеттеры
     public EpisodeDTO() {}
@@ -44,4 +48,13 @@ public class EpisodeDTO {
     public void setWatched(boolean watched) { this.watched = watched; }
     public Integer getCurrentTime() { return currentTime; }
     public void setCurrentTime(Integer currentTime) { this.currentTime = currentTime; }
+    public List<String> getAvailableVoiceovers() {
+        if (availableVoiceovers == null) {
+            return Arrays.asList("subbed", "dubbed"); // значения по умолчанию
+        }
+        return availableVoiceovers;
+    }
+    public void setAvailableVoiceovers(List<String> availableVoiceovers) {
+        this.availableVoiceovers = availableVoiceovers;
+    }
 }

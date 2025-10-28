@@ -4,6 +4,7 @@ package com.example.siamLacorns.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "episodes")
@@ -83,4 +84,22 @@ public class Episode {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // ДОБАВИТЬ в класс Episode:
+    public List<VoiceoverType> getAvailableVoiceovers() { return availableVoiceovers; }
+    public void setAvailableVoiceovers(List<VoiceoverType> availableVoiceovers) {
+        this.availableVoiceovers = availableVoiceovers;
+    }
+
+    @ElementCollection
+    @CollectionTable(name = "episode_voiceovers", joinColumns = @JoinColumn(name = "episode_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "voiceover_type")
+    private List<VoiceoverType> availableVoiceovers;
+
+    public enum VoiceoverType {
+        RUSSIAN_DUB, ORIGINAL_SUBBED, ENGLISH_DUB
+    }
+
+
 }

@@ -6,6 +6,8 @@ import com.example.siamLacorns.dto.RegisterRequestDTO;
 import com.example.siamLacorns.dto.UserDTO;
 import com.example.siamLacorns.model.User;
 import com.example.siamLacorns.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -45,12 +49,10 @@ public class UserController {
             return ResponseEntity.ok(user);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error getting user profile: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
@@ -62,6 +64,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
         } catch (Exception e) {
+            logger.error("Error getting user by username: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -79,11 +82,11 @@ public class UserController {
             User createdUser = userService.createUser(user);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
         } catch (Exception e) {
+            logger.error("Error creating user: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
-    // Получение пользователя по ID - ТЕПЕРЬ С ПРОВЕРКОЙ
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
@@ -91,7 +94,6 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    // Получение всех пользователей - ТОЛЬКО АДМИН
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserDTO> getAllUsers() {
@@ -110,7 +112,6 @@ public class UserController {
             if (userDetails.getBirthDate() != null) {
                 user.setBirthDate(userDetails.getBirthDate());
             } else {
-                // Если дата null, оставляем текущее значение
                 User existingUser = userRepository.findById(id).orElseThrow();
                 user.setBirthDate(existingUser.getBirthDate());
             }
@@ -118,9 +119,10 @@ public class UserController {
             user.setAvatar(userDetails.getAvatar());
 
             UserDTO updatedUser = userService.updateUser(id, user);
+            logger.debug("Updated user: id={}, avatar={}", id, user.getAvatar());
             return ResponseEntity.ok(updatedUser);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error updating user: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -137,9 +139,9 @@ public class UserController {
 
             String username = authentication.getName();
 
-            // 📁 Папка для сохранения аватаров (можно изменить путь)
-            String uploadDir = "D:\\3 курс\\ЖЦРПО\\code\\SiamLacorns\\src\\main\\resources\\static\\uploads\\avatars";
-            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+            // 📁 Папка для сохранения аватаров (для runtime)
+            String uploadDir = "target/classes/static/uploads/avatars";
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir).toAbsolutePath();
 
             if (!java.nio.file.Files.exists(uploadPath)) {
                 java.nio.file.Files.createDirectories(uploadPath);
@@ -153,20 +155,19 @@ public class UserController {
             java.nio.file.Path filePath = uploadPath.resolve(newFileName);
             file.transferTo(filePath.toFile());
 
-            // 🔗 Сохраняем путь к файлу в БД
-            String avatarUrl = "/uploads/avatars/" + newFileName;
+            // 🔗 Формируем полный URL для фронтенда
+            String avatarUrl = "http://localhost:8081/uploads/avatars/" + newFileName;
+            logger.debug("Avatar saved at: {}, URL: {}", filePath, avatarUrl);
             userService.updateAvatar(username, avatarUrl);
 
             return ResponseEntity.ok(Map.of("message", "Аватар успешно загружен", "avatarUrl", avatarUrl));
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error uploading avatar: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ошибка при загрузке аватара: " + e.getMessage());
         }
     }
 
-
-    // Удаление пользователя - ТЕПЕРЬ С ПРОВЕРКОЙ
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated() ")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
@@ -174,7 +175,6 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    // Добавление сериала в коллекцию - ТЕПЕРЬ С ПРОВЕРКОЙ АУТЕНТИФИКАЦИИ
     @PostMapping("/{userId}/collections/{collectionName}/series/{seriesId}")
     @PreAuthorize("isAuthenticated() and #userId == authentication.principal.id")
     public ResponseEntity<String> addSeriesToCollection(
@@ -185,7 +185,6 @@ public class UserController {
         return ResponseEntity.ok("Сериал добавлен в коллекцию " + collectionName);
     }
 
-    // Удаление сериала из коллекции - ТЕПЕРЬ С ПРОВЕРКОЙ АУТЕНТИФИКАЦИИ
     @DeleteMapping("/{userId}/collections/{collectionName}/series/{seriesId}")
     @PreAuthorize("isAuthenticated() ")
     public ResponseEntity<String> removeSeriesFromCollection(
@@ -196,11 +195,10 @@ public class UserController {
         return ResponseEntity.ok("Сериал удален из коллекции " + collectionName);
     }
 
-    // Получение всех коллекций пользователя - ТЕПЕРЬ С ПРОВЕРКОЙ АУТЕНТИФИКАЦИИ
     @GetMapping("/{userId}/collections")
     @PreAuthorize("isAuthenticated() ")
-    public ResponseEntity<List<CollectionDTO>> getUserCollections(@PathVariable Long userId) {
-        UserDTO user = userService.getUserById(userId);
+    public ResponseEntity<List<CollectionDTO>> getUserCollections(@PathVariable Long id) {
+        UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user.getCollections());
     }
 }

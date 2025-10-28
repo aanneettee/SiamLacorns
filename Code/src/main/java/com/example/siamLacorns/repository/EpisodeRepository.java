@@ -24,4 +24,6 @@ public interface EpisodeRepository extends JpaRepository<Episode, Long> {
 
     @Query("SELECT MAX(e.episodeNumber) FROM Episode e WHERE e.lacorn.id = :lacornId AND e.seasonNumber = :seasonNumber")
     Optional<Integer> findMaxEpisodeNumber(@Param("lacornId") Long lacornId, @Param("seasonNumber") Integer seasonNumber);
+
+    List<Episode> findByLacornId(Long lacornId);
 }

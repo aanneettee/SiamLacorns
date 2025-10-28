@@ -43,19 +43,16 @@ public class SeriesCollection {
         return id;
     }
 
+    // В методе getSeriesIds лучше использовать безопасный подход:
     public List<Long> getSeriesIds() {
-        // ✅ Убедитесь, что lacorns не null и инициализирован
         if (lacorns == null) {
             return new ArrayList<>();
         }
-
-        // ✅ Используйте безопасный подход
         try {
             return lacorns.stream()
                     .map(Lacorn::getId)
                     .collect(Collectors.toList());
         } catch (LazyInitializationException e) {
-            // Ловим исключение и возвращаем пустой список
             return new ArrayList<>();
         }
     }
