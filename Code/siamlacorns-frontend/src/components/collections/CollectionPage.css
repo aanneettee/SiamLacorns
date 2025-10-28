@@ -1,0 +1,266 @@
+/* CollectionPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
+
+.collection-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #a8d8f0, #c1e3f7);
+  font-family: 'Comic Neue', cursive;
+  padding: 0;
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-bottom: 0;
+}
+
+.cat-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.header-cat {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.cat-bubble {
+  background: white;
+  padding: 0.8rem 1.2rem;
+  border-radius: 20px;
+  border: 3px solid #000000;
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+  min-width: 140px;
+}
+
+.cat-bubble::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 20px;
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid white;
+}
+
+.cat-bubble::after {
+  content: '';
+  position: absolute;
+  left: -13px;
+  top: 19px;
+  width: 0;
+  height: 0;
+  border-top: 9px solid transparent;
+  border-bottom: 9px solid transparent;
+  border-right: 11px solid #000000;
+  z-index: -1;
+}
+
+.cat-bubble p {
+  margin: 0;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.collection-title-section {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.collection-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: iconBounce 2s infinite;
+}
+
+.png-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.3));
+  transition: all 0.3s ease;
+}
+
+.collection-icon:hover .png-icon {
+  transform: scale(1.15) rotate(5deg);
+  filter: drop-shadow(4px 4px 0px rgba(0,0,0,0.4));
+}
+
+.collection-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0;
+  letter-spacing: 1px;
+  line-height: 1;
+  padding: 0.5rem 0 0 0;
+}
+
+.collection-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.collection-frame {
+  border: 4px solid #000000;
+  border-radius: 12px;
+  padding: 2rem;
+  background: transparent;
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+  min-height: 400px;
+}
+
+.lacorns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1.5rem;
+}
+
+.empty-collection {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+}
+
+.empty-collection p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+/* Стили для карточек лакорнов (аналогичные Home.css) */
+.lacorn-item {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.lacorn-item:hover {
+  transform: translateY(-5px);
+}
+
+.lacorn-poster {
+  position: relative;
+  height: 240px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid #000000;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+.lacorn-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.lacorn-item:hover .lacorn-poster img {
+  transform: scale(1.05);
+}
+
+.lacorn-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.8));
+  display: flex;
+  align-items: flex-end;
+  padding: 0.8rem;
+}
+
+.lacorn-rating {
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.lacorn-title {
+  margin: 0.5rem 0 0.2rem 0;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.lacorn-year {
+  color: #7f8c8d;
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  .collection-header {
+    padding: 0.5rem;
+  }
+
+  .collection-title {
+    font-size: 2.2rem;
+  }
+
+  .collection-frame {
+    padding: 1rem;
+  }
+
+  .lacorns-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .lacorn-poster {
+    height: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collection-title {
+    font-size: 1.8rem;
+  }
+
+  .lacorns-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cat-bubble {
+    min-width: 120px;
+    padding: 0.6rem 1rem;
+  }
+
+  .cat-bubble p {
+    font-size: 0.8rem;
+  }
+}
+
+/* Стили меню (скопированные из Home.css) */
+.menu-modal-overlay,
+.menu-modal,
+.menu-modal-title,
+.menu-modal-content,
+.menu-modal-column,
+.menu-modal-button,
+.leave-page-button {
+  /* Все стили меню из Home.css */
+}

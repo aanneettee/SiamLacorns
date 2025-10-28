@@ -42,20 +42,10 @@
   font-family: 'Comic Neue', cursive;
 }
 
-.menu-modal-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.menu-modal-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-}
-
 .menu-modal-button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
   padding: 0.8rem 1.2rem;
   background: white;
   color: #000000;
@@ -67,8 +57,15 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 0 #000000;
-  text-align: center;
+  text-align: left;
   text-decoration: none;
+}
+
+.menu-modal-button-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .menu-modal-button:hover {
@@ -80,6 +77,19 @@
 .menu-modal-button:active {
   transform: translateY(4px);
   box-shadow: 0 1px 0 #000000;
+}
+
+.menu-modal-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.menu-modal-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .menu-modal-footer {
@@ -285,14 +295,14 @@
 
 /* Поиск */
 .search-section {
-  margin-bottom: 2rem;
-  padding: 0 1rem;
-  display: flex;
-  justify-content: center;
+  overflow: visible;
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
 }
 
 .search-input {
-  width: 100%;
+  width: 500px;
   max-width: 500px;
   padding: 1rem 1.5rem;
   border: 3px solid #000000;
@@ -304,6 +314,7 @@
   box-shadow: 4px 4px 0px #000000;
   outline: none;
   position: relative;
+  z-index: 10;
 }
 
 .search-input::placeholder {
@@ -318,7 +329,7 @@
   box-shadow: 6px 6px 0px #000000;
 }
 
-/* ФИЛЬТРЫ - ПОЛНОСТЬЮ ПЕРЕДЕЛАННАЯ СЕКЦИЯ */
+/* ФИЛЬТРЫ */
 .filters-section {
   display: flex;
   justify-content: center;
@@ -372,7 +383,61 @@
   font-size: 0.8rem;
 }
 
-/* КНОПКИ ФИЛЬТРОВ - ОДИНАКОВЫЕ СТИЛИ */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #7f8c8d;
+  font-family: 'Comic Neue', cursive;
+}
+
+.empty-state p {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.8rem 1.5rem;
+  background-color: #3498db;
+  color: white;
+  border: 3px solid #000000;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 0 #000000;
+}
+
+.retry-button:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #000000;
+  background-color: #2980b9;
+}
+
+.retry-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #000000;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .empty-state {
+    padding: 2rem;
+  }
+
+  .empty-state p {
+    font-size: 1.1rem;
+  }
+
+  .retry-button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* КНОПКИ ФИЛЬТРОВ */
 .filter-button {
   width: 45px;
   min-width: 45px;
@@ -391,7 +456,8 @@
   padding: 0;
 }
 
-/* ОДИНАКОВАЯ АНИМАЦИЯ ДЛЯ ВСЕХ КНОПОК */
+
+
 .filter-button:hover,
 .filter-select:hover {
   transform: translateY(-2px);
@@ -428,16 +494,19 @@
   box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
 }
 
+/* ФИКСИРОВАННЫЕ КАРТОЧКИ - 5 В СТРОКЕ, ВЫРАВНИВАНИЕ СЛЕВА */
 .lacorns-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(5, 180px); /* Фиксированно 5 карточек в строке */
+  gap: 0.8rem; /* Уменьшенное расстояние между карточками */
+  justify-content: flex-start; /* Выравнивание слева */
 }
 
 .lacorn-item {
   text-decoration: none;
   color: inherit;
   transition: transform 0.3s ease;
+  width: 180px; /* Фиксированная ширина */
 }
 
 .lacorn-item:hover {
@@ -446,7 +515,7 @@
 
 .lacorn-poster {
   position: relative;
-  height: 240px;
+  height: 240px; /* Фиксированная высота */
   border-radius: 8px;
   overflow: hidden;
   border: 3px solid #000000;
@@ -488,12 +557,56 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
+  text-align: center;
+  height: 2.4rem; /* Фиксированная высота для названия */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
-.lacorn-year {
+/* Стили для состояний загрузки и ошибок */
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #000000;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+}
+
+.error-state {
+  color: #e74c3c;
+}
+
+.empty-state {
   color: #7f8c8d;
-  font-size: 0.8rem;
-  margin: 0;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border: 2px solid #000000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Comic Neue', cursive;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.retry-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px #000000;
+  background-color: #2980b9;
+}
+
+.retry-button:active {
+  transform: translateY(1px);
+  box-shadow: 1px 1px 0px #000000;
 }
 
 /* Мобильная адаптация */
@@ -534,6 +647,21 @@
   .menu-modal {
     padding: 1.5rem;
   }
+
+  /* Фиксированные карточки на мобильных */
+  .lacorns-grid {
+    grid-template-columns: repeat(2, 160px); /* 2 карточки в строке для мобильных */
+    gap: 0.6rem; /* Уменьшенное расстояние */
+    justify-content: flex-start; /* Выравнивание слева */
+  }
+
+  .lacorn-item {
+    width: 160px;
+  }
+
+  .lacorn-poster {
+    height: 200px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -545,6 +673,8 @@
   .search-input {
     padding: 0.8rem 1.2rem;
     font-size: 1rem;
+    width: 90%;
+    max-width: 90%;
   }
 
   .filters-main-container {
@@ -566,13 +696,28 @@
     font-size: 1.3rem;
   }
 
-  .lacorns-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
+  /* Фиксированные карточки на маленьких экранах */
+ .lacorns-grid {
+   display: grid;
+   grid-template-columns: repeat(5, 180px); /* Фиксированно 5 карточек в строке */
+   gap: 0.8rem; /* Уменьшенное расстояние между карточками */
+   justify-content: flex-start; /* Выравнивание слева */
+ }
+
+ .lacorn-item {
+   text-decoration: none;
+   color: inherit;
+   transition: transform 0.3s ease;
+   width: 180px; /* Фиксированная ширина */
+ }
 
   .lacorn-poster {
-    height: 160px;
+    height: 200px;
+  }
+
+  .lacorn-title {
+    font-size: 0.9rem;
+    height: 2.2rem;
   }
 
   .help-bubble {
@@ -604,5 +749,40 @@
   .menu-modal-title {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
+  }
+
+  .loading-state,
+  .error-state,
+  .empty-state {
+    padding: 1rem;
+  }
+
+  .retry-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .popular-title {
+    margin-left: 1rem;
+    font-size: 1.5rem;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 768px) {
+  .lacorn-item {
+    width: 160px;
+    margin: 0 0.4rem 0.6rem 0.4rem;
+  }
+  .lacorn-poster {
+    height: 200px;
+  }
+  .lacorns-grid {
+    gap: 0.6rem;
+    margin: 0 -0.4rem;
+  }
+
+  .lacorn-title {
+    font-size: 0.85rem;
   }
 }
