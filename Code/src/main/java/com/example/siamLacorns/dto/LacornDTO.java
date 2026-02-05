@@ -3,33 +3,18 @@ package com.example.siamLacorns.dto;
 
 import com.example.siamLacorns.exception.ValidationException;
 import com.example.siamLacorns.model.Lacorn;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import java.util.ArrayList;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Builder
+@AllArgsConstructor
 public class LacornDTO {
-    private Long id;
-    private String title;
-    private String description;
-    private Integer releaseYear;
-    private Integer totalEpisodes;
-    private Integer episodeDuration;
-    private String posterUrl;
-    private String trailerUrl;
-    private List<String> genres;
-    private String ageRating;
-    private Double rating;
-    private List<EpisodeDTO> episodes;
-    private WatchProgressDTO watchProgress;
-    private List<ActorDTO> actors;
-    private String status;
-    private List<String> availableVoiceovers;
-    private List<String> productionCountries;
     // Конструкторы, геттеры и сеттеры
-    public LacornDTO() {}
-
     public LacornDTO(Lacorn lacorn) {
         this.id = lacorn.getId();
         this.title = lacorn.getTitle();
@@ -63,37 +48,49 @@ public class LacornDTO {
     }
 
     // Геттеры и сеттеры
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Setter
+    @Getter
+    private Long id;
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    @Setter
+    @Getter
+    private String title;
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    @Setter
+    @Getter
+    private String description;
 
-    public Integer getReleaseYear() { return releaseYear; }
-    public void setReleaseYear(Integer releaseYear) { this.releaseYear = releaseYear; }
+    @Setter
+    @Getter
+    private Integer releaseYear;
 
-    public Integer getTotalEpisodes() { return totalEpisodes; }
-    public void setTotalEpisodes(Integer totalEpisodes) { this.totalEpisodes = totalEpisodes; }
+    @Setter
+    @Getter
+    private Integer totalEpisodes;
 
-    public Integer getEpisodeDuration() { return episodeDuration; }
-    public void setEpisodeDuration(Integer episodeDuration) { this.episodeDuration = episodeDuration; }
+    @Setter
+    @Getter
+    private Integer episodeDuration;
 
-    public String getPosterUrl() { return posterUrl; }
-    public void setPosterUrl(String posterUrl) { this.posterUrl = posterUrl; }
+    @Setter
+    @Getter
+    private String posterUrl;
 
-    public String getTrailerUrl() { return trailerUrl; }
-    public void setTrailerUrl(String trailerUrl) { this.trailerUrl = trailerUrl; }
+    @Setter
+    @Getter
+    private String trailerUrl;
 
-    public List<String> getGenres() { return genres; }
-    public void setGenres(List<String> genres) { this.genres = genres; }
+    @Setter
+    @Getter
+    private List<String> genres;
 
-    public String getAgeRating() { return ageRating; }
-    public void setAgeRating(String ageRating) { this.ageRating = ageRating; }
+    @Setter
+    @Getter
+    private String ageRating;
 
-    public Double getRating() { return rating; }
+    @Getter
+    private Double rating;
+
     public void setRating(Double rating) {
         if (rating != null && (rating < 0 || rating > 10)) {
             throw new ValidationException("Рейтинг должен быть от 0 до 10");
@@ -101,23 +98,29 @@ public class LacornDTO {
         this.rating = rating;
     }
 
-    public List<EpisodeDTO> getEpisodes() { return episodes; }
-    public void setEpisodes(List<EpisodeDTO> episodes) { this.episodes = episodes; }
+    @Setter
+    @Getter
+    private List<EpisodeDTO> episodes;
 
-    public WatchProgressDTO getWatchProgress() { return watchProgress; }
-    public void setWatchProgress(WatchProgressDTO watchProgress) { this.watchProgress = watchProgress; }
+    @Setter
+    @Getter
+    private WatchProgressDTO watchProgress;
 
-    public List<ActorDTO> getActors() { return actors; }
-    public void setActors(List<ActorDTO> actors) { this.actors = actors; }
+    @Setter
+    @Getter
+    private List<ActorDTO> actors;
+
+    @Setter
+    private String status;
+
+    @Setter
+    @Getter
+    private List<String> availableVoiceovers;
+    private List<String> productionCountries;
+
 
     public String getStatus() {
         return status != null ? status : "ONGOING";
-    }
-    public void setStatus(String status) { this.status = status; }
-
-    public List<String> getAvailableVoiceovers() { return availableVoiceovers; }
-    public void setAvailableVoiceovers(List<String> availableVoiceovers) {
-        this.availableVoiceovers = availableVoiceovers;
     }
 
     @Override
