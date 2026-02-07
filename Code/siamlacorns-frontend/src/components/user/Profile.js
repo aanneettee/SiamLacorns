@@ -734,7 +734,7 @@ const Profile = () => {
                             alt={result.title || result.name}
                             className="tmdb-poster"
                             onError={(e) => {
-                              e.target.src = '/images/default-poster.jpg';
+                              e.target.src = '/images/default-poster.webp';
                             }}
                           />
                           <div className="tmdb-result-info">
@@ -899,7 +899,7 @@ const Profile = () => {
                     <label className="form-label">Poster URL</label>
                     <input
                       type="text"
-                      placeholder="https://example.com/poster.jpg"
+                      placeholder="https://example.com/poster.webp"
                       value={newLacorn.posterUrl}
                       onChange={(e) => setNewLacorn({...newLacorn, posterUrl: e.target.value})}
                     />
@@ -991,10 +991,10 @@ const Profile = () => {
                   <div key={lacorn.id} className="lacorn-card-admin">
                     <div className="lacorn-poster-admin">
                       <img
-                        src={lacorn.posterUrl || '/images/default-poster.jpg'}
+                        src={lacorn.posterUrl || '/images/default-poster.webp'}
                         alt={lacorn.title}
                         onError={(e) => {
-                          e.target.src = '/images/default-poster.jpg';
+                          e.target.src = '/images/default-poster.webp';
                         }}
                       />
                     </div>

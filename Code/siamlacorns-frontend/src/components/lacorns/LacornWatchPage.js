@@ -204,11 +204,11 @@ const LacornWatchPage = () => {
       <div className="lacorn-header-section">
         <div className="lacorn-poster-container">
           <img
-            src={lacorn.posterUrl || '/images/default-poster.jpg'}
+            src={lacorn.posterUrl || '/images/default-poster.webp'}
             alt={lacorn.title}
             className="lacorn-poster"
             onError={(e) => {
-              e.target.src = '/images/default-poster.jpg';
+              e.target.src = '/images/default-poster.webp';
             }}
           />
           <button

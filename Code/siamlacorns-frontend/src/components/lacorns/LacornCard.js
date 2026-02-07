@@ -19,10 +19,10 @@ const LacornCard = ({ lacorn }) => {
     <div className="lacorn-card" onClick={handleCardClick}>
       <div className="lacorn-card-image">
         <img
-          src={lacorn.posterUrl || '/images/default-poster.jpg'}
+          src={lacorn.posterUrl || '/images/default-poster.webp'}
           alt={lacorn.title}
           onError={(e) => {
-            e.target.src = '/images/default-poster.jpg';
+            e.target.src = '/images/default-poster.webp';
           }}
         />
         <div className="lacorn-card-overlay">

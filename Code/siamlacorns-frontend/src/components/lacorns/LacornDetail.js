@@ -86,7 +86,7 @@ const LacornDetail = () => {
       <div className="lacorn-header">
         <div className="lacorn-poster">
           <img
-            src={lacorn.posterUrl || '/images/default-poster.jpg'}
+            src={lacorn.posterUrl || '/images/default-poster.webp'}
             alt={lacorn.title}
           />
         </div>
@@ -229,7 +229,7 @@ const LacornDetail = () => {
                 <div key={actor.id} className="actor-card">
                   <div className="actor-photo">
                     <img
-                      src={actor.photoUrl || '/images/default-avatar.jpg'}
+                      src={actor.photoUrl || '/images/default-avatar.webp'}
                       alt={actor.name}
                     />
                   </div>

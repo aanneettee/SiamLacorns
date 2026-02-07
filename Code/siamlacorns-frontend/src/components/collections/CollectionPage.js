@@ -97,7 +97,7 @@ const CollectionPage = ({ collectionType, collectionName }) => {
                     src={lacorn.posterUrl}
                     alt={lacorn.title}
                     onError={(e) => {
-                      e.target.src = '/default-poster.jpg';
+                      e.target.src = '/default-poster.webp';
                     }}
                   />
                   <div className="lacorn-overlay">

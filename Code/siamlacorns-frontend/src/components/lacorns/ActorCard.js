@@ -7,10 +7,10 @@ const ActorCard = ({ actor }) => {
     <div className="actor-card">
       <div className="actor-photo">
         <img
-          src={actor.photoUrl || '/images/default-avatar.jpg'}
+          src={actor.photoUrl || '/images/default-avatar.webp'}
           alt={actor.name}
           onError={(e) => {
-            e.target.src = '/images/default-avatar.jpg';
+            e.target.src = '/images/default-avatar.webp';
           }}
         />
       </div>
