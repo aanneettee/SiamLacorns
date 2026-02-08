@@ -12,12 +12,20 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ActorDTO {
     private Long id;
+
     private String name;
+
+    public void setName(String name) {
+        this.name = name;
+        this.heightCm = genHeight(name);
+    }
+
     private String biography;
     private String photoUrl;
     private LocalDate birthDate;
     private String nationality;
     private String character;
+    private Integer heightCm;
 
     public ActorDTO(Actor actor) {
         this.id = actor.getId();
@@ -27,17 +35,26 @@ public class ActorDTO {
         this.birthDate = actor.getBirthDate();
         this.nationality = actor.getNationality();
         this.character = actor.getCharacterName();
+        this.heightCm = actor.getHeightCm();
+
+        if (this.heightCm == null) this.heightCm = genHeight(this.name);
     }
 
-    public ActorDTO(Long id, String name) {
-        this.id = id;
-        this.name = name;
+    private static double seededRandom(long seed) {
+        seed = Math.abs(seed);
+        if (seed == 0) seed = 1;
+        return (((seed * 16807) % 2147483647) - 1) / 2147483646.0;
     }
 
-    public ActorDTO(Long id, String name, String biography, String photoUrl) {
-        this.id = id;
-        this.name = name;
-        this.biography = biography;
-        this.photoUrl = photoUrl;
+    private static double normalRandom(long seedVal, double median, double stdDev) {
+        double u1 = seededRandom(seedVal);
+        double u2 = seededRandom(seedVal);
+        double z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+        return median + z0 * stdDev;
+    }
+
+    // TODO this is temporary before we'll add a height into the database
+    public static int genHeight(String actorName) {
+        return (int) Math.floor(normalRandom(actorName.hashCode(), 180, 8));
     }
 }
