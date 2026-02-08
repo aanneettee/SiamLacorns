@@ -32,19 +32,13 @@ public class Actor {
     private java.time.LocalDate birthDate;
 
     private String nationality;
+
     @Column(name = "character_name")
     private String characterName;
 
+    @Column(name = "height_cm")
+    private Integer heightCm;
+
     @ManyToMany(mappedBy = "actors")
     private List<Lacorn> lacorns = new ArrayList<>();
-
-    public Actor(String name) {
-        this.name = name;
-    }
-
-    public Actor(String name, String biography, String photoUrl) {
-        this.name = name;
-        this.biography = biography;
-        this.photoUrl = photoUrl;
-    }
 }

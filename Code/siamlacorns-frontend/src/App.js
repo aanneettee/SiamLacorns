@@ -1,5 +1,4 @@
 // App.js
-import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/auth/Login.js';
 import Home from './components/home/Home.js';
@@ -7,6 +6,7 @@ import Help from './components/help/Help.js';
 import Register from './components/auth/Register.js';
 import LacornList from './components/lacorns/LacornList.js';
 import LacornDetail from './components/lacorns/LacornDetail.js';
+import LacornPage from './components/actors/ActorPage.js';
 import LacornWatchPage from './components/lacorns/LacornWatchPage.js';
 import Profile from './components/user/Profile.js';
 import { useAuth } from './context/AuthContext.js';
@@ -44,6 +44,7 @@ function App() {
         <Route path="/lacorns" element={<LacornList />} />
         <Route path="/watch/:id" element={<LacornWatchPage />} />
         <Route path="/lacorns/:id" element={<LacornDetail />} />
+        <Route path="/actors/:id" element={<LacornPage />} />
         <Route path="/collections/favourites" element={<FavouritesPage />} />
         <Route path="/collections/watch-later" element={<WatchLaterPage />} />
         <Route path="/collections/started" element={<StartedPage />} />
