@@ -1,8 +1,15 @@
-// ActorDTO.java
 package com.example.siamLacorns.dto;
+
+import com.example.siamLacorns.model.Actor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
+@Getter
+@NoArgsConstructor
 public class ActorDTO {
     private Long id;
     private String name;
@@ -11,8 +18,16 @@ public class ActorDTO {
     private LocalDate birthDate;
     private String nationality;
     private String character;
-    // Конструкторы
-    public ActorDTO() {}
+
+    public ActorDTO(Actor actor) {
+        this.id = actor.getId();
+        this.name = actor.getName();
+        this.biography = actor.getBiography();
+        this.photoUrl = actor.getPhotoUrl();
+        this.birthDate = actor.getBirthDate();
+        this.nationality = actor.getNationality();
+        this.character = actor.getCharacterName();
+    }
 
     public ActorDTO(Long id, String name) {
         this.id = id;
@@ -25,28 +40,4 @@ public class ActorDTO {
         this.biography = biography;
         this.photoUrl = photoUrl;
     }
-
-    // Геттеры и сеттеры
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getBiography() { return biography; }
-    public void setBiography(String biography) { this.biography = biography; }
-
-    public String getPhotoUrl() { return photoUrl; }
-    public void setPhotoUrl(String photoUrl) { this.photoUrl = photoUrl; }
-
-    public LocalDate getBirthDate() { return birthDate; }
-    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
-
-    public String getNationality() { return nationality; }
-    public void setNationality(String nationality) { this.nationality = nationality; }
-
-    public String getCharacter() { return character; }
-    public void setCharacter(String character) { this.character = character; }
-
-
 }
