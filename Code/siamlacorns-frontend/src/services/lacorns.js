@@ -16,6 +16,23 @@ export const lacornService = {
       throw error;
     }
   },
+  // services/lacorns.js - добавить метод
+
+ async getLacornsByActorId(actorId) {
+     try {
+       console.log(`Fetching lacorns for actor ID: ${actorId}`);
+       // Предполагается, что у вас есть эндпоинт /api/lacorns/actor/{actorId}
+       // Если нет, используйте другой подходящий эндпоинт
+       const response = await api.get(`/lacorns/actor/${actorId}`);
+       console.log('Lacorns by actor response:', response.data);
+       return response.data;
+     } catch (error) {
+       console.error(`Error fetching lacorns for actor ${actorId}:`, error);
+       // Если эндпоинт не существует, возвращаем пустой массив
+       // или используйте альтернативный метод получения
+       return [];
+     }
+   },
 
   // Получение эпизодов лако́рна
   async getEpisodes(lacornId, config = {}) {

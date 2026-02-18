@@ -15,6 +15,8 @@ import FavouritesPage from './components/collections/FavouritesPage';
 import WatchLaterPage from './components/collections/WatchLaterPage';
 import StartedPage from './components/collections/StartedPage';
 import ForsakenPage from './components/collections/ForsakenPage';
+import ActorsPage from './components/actors/ActorsPage';
+import ActorPage from './components/actors/ActorPage';
 import './App.css';
 
 function App() {
@@ -36,7 +38,8 @@ function App() {
   return (
     <div className="App">
       <Routes>
-
+        <Route path="/actors/:id" element={<ActorPage />} />
+        <Route path="/actors" element={<ActorsPage />} />
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

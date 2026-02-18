@@ -1,7 +1,8 @@
-// Profile.js - исправленная версия
+// Profile.js - исправленная версия с импортом актёров и убранным годом из поиска TMDB
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import './Profile.css';
 import tmdbService from '../../services/tmdbService';
 
@@ -11,6 +12,7 @@ const Profile = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [lacorns, setLacorns] = useState([]);
+  const [error, setError] = useState(null);
   const [newLacorn, setNewLacorn] = useState({
     title: '',
     description: '',
@@ -66,13 +68,12 @@ const Profile = () => {
 
   const [tmdbSearch, setTmdbSearch] = useState({
     query: '',
-    year: new Date().getFullYear(),
     results: [],
     selectedResult: null,
     isLoading: false
   });
 
-  // Функция для поиска в TMDB
+  // Функция для поиска в TMDB (только по названию)
   const searchTMDB = async () => {
     if (!tmdbSearch.query.trim()) return;
 
@@ -81,7 +82,7 @@ const Profile = () => {
 
       const results = await tmdbService.searchContent(
         tmdbSearch.query,
-        tmdbSearch.year,
+        null, // year больше не передаём
         'multi'
       );
 
@@ -97,80 +98,89 @@ const Profile = () => {
     }
   };
 
-  // Функция для автоматического заполнения формы
- const autoFillFromTMDB = async (result) => {
-   try {
-     setIsLoading(true);
+  // Функция полного импорта из TMDB с актёрами
+  const handleImportFromTMDB = async (result) => {
+    try {
+      setIsLoading(true);
 
-     const lacornData = await tmdbService.autoFillLacornData(
-       result.title || result.name,
-       tmdbSearch.year
-     );
+      const mediaType = result.media_type ||
+                       (result.title ? 'movie' : 'tv');
 
-     if (lacornData) {
-       setNewLacorn({
-         ...lacornData,
-         // Автоматически заполняем страны производства
-         productionCountries: lacornData.productionCountries || [],
-         // Автоматически создаем актёров
-         actors: lacornData.actors || []
-       });
+      console.log(`Importing from TMDB: ${result.title || result.name} (${mediaType})`);
 
-       setTmdbSearch(prev => ({
-         ...prev,
-         selectedResult: result,
-         results: []
-       }));
+      // Убрали year из параметров
+      const response = await api.post('/tmdb/auto-import', null, {
+        params: {
+          title: result.title || result.name
+          // year больше не передаём
+        }
+      });
 
-       alert('Data automatically filled from TMDB including actors and production countries!');
-     } else {
-       alert('Could not fetch detailed information from TMDB');
-     }
-   } catch (error) {
-     console.error('Error auto-filling from TMDB:', error);
-     alert('Error fetching data from TMDB');
-   } finally {
-     setIsLoading(false);
-   }
- };
+      const importedLacorn = response.data;
+      console.log('Imported lacorn with actors:', importedLacorn);
 
-  // Загрузка всех лакорнов для админ-панели - ИСПРАВЛЕННАЯ ВЕРСИЯ
- const fetchLacorns = useCallback(async () => {
-   try {
-     console.log('Fetching lacorns for admin panel...');
+      setLacorns(prevLacorns => {
+        const exists = prevLacorns.some(l => l.id === importedLacorn.id);
+        if (exists) {
+          return prevLacorns.map(l => l.id === importedLacorn.id ? importedLacorn : l);
+        }
+        return [importedLacorn, ...prevLacorns];
+      });
 
-     const response = await fetch(
-       'http://localhost:8081/api/lacorns?page=0&size=50&sort=id,desc',
-       {
-         headers: {
-           'Authorization': `Bearer ${token}`,
-           'Content-Type': 'application/json'
-         }
-       }
-     );
+      setTmdbSearch(prev => ({
+        ...prev,
+        results: [],
+        query: '',
+        selectedResult: null
+      }));
 
-     if (!response.ok) {
-       throw new Error(`HTTP error! status: ${response.status}`);
-     }
+      setNewLacorn({
+        title: '',
+        description: '',
+        releaseYear: new Date().getFullYear(),
+        totalEpisodes: 1,
+        episodeDuration: 45,
+        posterUrl: '',
+        trailerUrl: '',
+        genres: [],
+        ageRating: 'PG-13',
+        rating: 0.0,
+        status: 'ONGOING',
+        availableVoiceovers: []
+      });
 
-     const data = await response.json();
-     console.log('Admin Panel API Response:', data);
+      alert(`Лакорн "${importedLacorn.title}" успешно импортирован с актёрами из TMDB!`);
+    } catch (error) {
+      console.error('Error importing from TMDB:', error);
+      alert(`Ошибка импорта: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-     // Универсальный парсинг ответа
-     const lacornsArray = data.content || data || [];
+  // Загрузка всех лакорнов для админ-панели
+  const fetchLacorns = useCallback(async () => {
+    try {
+      console.log('Fetching lacorns for admin panel...');
 
-     if (lacornsArray.length === 0) {
-       console.warn('No lacorns found in response');
-     }
+      const response = await api.get('/lacorns?page=0&size=50&sort=id,desc');
 
-     setLacorns(lacornsArray);
+      console.log('Admin Panel API Response:', response.data);
 
-   } catch (error) {
-     console.error('Error fetching lacorns:', error);
-     setError('Failed to load lacorns');
-     setLacorns([]);
-   }
- }, [token]);
+      const lacornsArray = response.data.content || response.data || [];
+
+      if (lacornsArray.length === 0) {
+        console.warn('No lacorns found in response');
+      }
+
+      setLacorns(lacornsArray);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching lacorns:', error);
+      setError('Failed to load lacorns');
+      setLacorns([]);
+    }
+  }, []);
 
   // Переключение на админ-панель
   useEffect(() => {
@@ -179,48 +189,30 @@ const Profile = () => {
     }
   }, [activeTab, user, fetchLacorns]);
 
-  // Функции для управления лакорнами
+  // Функции для управления лакорнами (ручное создание)
   const handleAddLacorn = async (e) => {
     e.preventDefault();
 
     try {
-      const lacornData = {
-        ...newLacorn,
-        actors: newLacorn.actors || [] // Убедитесь, что актёры включены
-      };
+      const response = await api.post('/lacorns', newLacorn);
 
-      console.log('Sending lacorn data with actors:', lacornData);
-
-      const response = await fetch('http://localhost:8081/api/lacorns', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newLacorn)
+      const createdLacorn = response.data;
+      setLacorns(prevLacorns => [...prevLacorns, createdLacorn]);
+      setNewLacorn({
+        title: '',
+        description: '',
+        releaseYear: new Date().getFullYear(),
+        totalEpisodes: 1,
+        episodeDuration: 45,
+        posterUrl: '',
+        trailerUrl: '',
+        genres: [],
+        ageRating: 'PG-13',
+        rating: 0.0,
+        status: 'ONGOING',
+        availableVoiceovers: []
       });
-
-      if (response.ok) {
-        const createdLacorn = await response.json();
-        setLacorns(prevLacorns => [...prevLacorns, createdLacorn]);
-        setNewLacorn({
-          title: '',
-          description: '',
-          releaseYear: new Date().getFullYear(),
-          totalEpisodes: 1,
-          episodeDuration: 45,
-          posterUrl: '',
-          trailerUrl: '',
-          genres: [],
-          ageRating: 'PG-13',
-          rating: 0.0,
-          status: 'ONGOING',
-          availableVoiceovers: []
-        });
-        alert('Lacorn added successfully!');
-      } else {
-        throw new Error('Failed to add lacorn');
-      }
+      alert('Lacorn added successfully!');
     } catch (error) {
       console.error('Error adding lacorn:', error);
       alert('Error adding lacorn');
@@ -249,44 +241,26 @@ const Profile = () => {
     e.preventDefault();
 
     try {
-      const lacornData = {
-        ...newLacorn,
-        actors: newLacorn.actors || [] // Убедитесь, что актёры включены
-      };
+      const response = await api.put(`/lacorns/${editingLacorn.id}`, newLacorn);
 
-      console.log('Updating lacorn with data:', lacornData);
-
-      const response = await fetch(`http://localhost:8081/api/lacorns/${editingLacorn.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(newLacorn)
+      const updatedLacorn = response.data;
+      setLacorns(prevLacorns => prevLacorns.map(l => l.id === editingLacorn.id ? updatedLacorn : l));
+      setEditingLacorn(null);
+      setNewLacorn({
+        title: '',
+        description: '',
+        releaseYear: new Date().getFullYear(),
+        totalEpisodes: 1,
+        episodeDuration: 45,
+        posterUrl: '',
+        trailerUrl: '',
+        genres: [],
+        ageRating: 'PG-13',
+        rating: 0.0,
+        status: 'ONGOING',
+        availableVoiceovers: []
       });
-
-      if (response.ok) {
-        const updatedLacorn = await response.json();
-        setLacorns(prevLacorns => prevLacorns.map(l => l.id === editingLacorn.id ? updatedLacorn : l));
-        setEditingLacorn(null);
-        setNewLacorn({
-          title: '',
-          description: '',
-          releaseYear: new Date().getFullYear(),
-          totalEpisodes: 1,
-          episodeDuration: 45,
-          posterUrl: '',
-          trailerUrl: '',
-          genres: [],
-          ageRating: 'PG-13',
-          rating: 0.0,
-          status: 'ONGOING',
-          availableVoiceovers: []
-        });
-        alert('Lacorn updated successfully!');
-      } else {
-        throw new Error('Failed to update lacorn');
-      }
+      alert('Lacorn updated successfully!');
     } catch (error) {
       console.error('Error updating lacorn:', error);
       alert('Error updating lacorn');
@@ -296,12 +270,7 @@ const Profile = () => {
   const handleDeleteLacorn = async (id) => {
     if (window.confirm('Are you sure you want to delete this lacorn?')) {
       try {
-        await fetch(`http://localhost:8081/api/lacorns/${id}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        await api.delete(`/lacorns/${id}`);
         setLacorns(prevLacorns => prevLacorns.filter(lacorn => lacorn.id !== id));
         alert('Lacorn deleted successfully!');
       } catch (error) {
@@ -342,24 +311,12 @@ const Profile = () => {
 
     console.log('Sending user data to server:', payload);
 
-    const res = await fetch(`http://localhost:8081/api/users/${user.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
+    const response = await api.put(`/users/${user.id}`, payload);
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Ошибка обновления профиля: ${text}`);
-    }
-
-    const updatedUser = await res.json();
+    const updatedUser = response.data;
     if (updateUser) updateUser(updatedUser);
     return updatedUser;
-  }, [user?.id, token, updateUser]);
+  }, [user?.id, updateUser]);
 
   const uploadAvatarToServer = useCallback(async (file) => {
     if (!file) return null;
@@ -367,20 +324,12 @@ const Profile = () => {
     const formData = new FormData();
     formData.append('file', file);
 
-    const res = await fetch('http://localhost:8081/api/users/avatar', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formData
+    const response = await api.post('/users/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      throw new Error(`Ошибка загрузки аватара: ${text}`);
-    }
-
-    const data = await res.json();
-    return data.avatarUrl || null;
-  }, [token]);
+    return response.data.avatarUrl || null;
+  }, []);
 
   const handleAvatarUpload = useCallback(async (event) => {
     const file = event.target.files[0];
@@ -445,7 +394,6 @@ const Profile = () => {
     }
   }, [userInfo, updateUserData]);
 
-  // Отмена редактирования
   const handleCancelEditing = useCallback(() => {
     setIsEditing(false);
     if (user) {
@@ -459,12 +407,10 @@ const Profile = () => {
     }
   }, [user]);
 
-  // Начало редактирования
   const handleStartEditing = useCallback(() => {
     setIsEditing(true);
   }, []);
 
-  // Обработка изменения полей ввода
   const handleInputChange = useCallback((field, value) => {
     setUserInfo(prev => ({ ...prev, [field]: value }));
   }, []);
@@ -689,7 +635,7 @@ const Profile = () => {
             </div>
 
             <div className="tmdb-search-section">
-              <h3>Auto-fill from TMDB</h3>
+              <h3>Search & Import from TMDB</h3>
               <div className="tmdb-search-form">
                 <div className="form-row">
                   <div className="form-field-group">
@@ -699,15 +645,6 @@ const Profile = () => {
                       value={tmdbSearch.query}
                       onChange={(e) => setTmdbSearch(prev => ({ ...prev, query: e.target.value }))}
                       className="tmdb-search-input"
-                    />
-                  </div>
-                  <div className="form-field-group">
-                    <input
-                      type="number"
-                      placeholder="Year"
-                      value={tmdbSearch.year}
-                      onChange={(e) => setTmdbSearch(prev => ({ ...prev, year: parseInt(e.target.value) || new Date().getFullYear() }))}
-                      className="tmdb-year-input"
                     />
                   </div>
                   <div className="form-field-group">
@@ -725,7 +662,7 @@ const Profile = () => {
                 {/* Результаты поиска */}
                 {tmdbSearch.results.length > 0 && (
                   <div className="tmdb-results">
-                    <h4>Search Results:</h4>
+                    <h4>Search Results (click "Import" to add with actors):</h4>
                     <div className="tmdb-results-grid">
                       {tmdbSearch.results.slice(0, 5).map((result) => (
                         <div key={result.id} className="tmdb-result-card">
@@ -740,16 +677,17 @@ const Profile = () => {
                           <div className="tmdb-result-info">
                             <h5>{result.title || result.name}</h5>
                             <p className="tmdb-year">
-                              {new Date(result.release_date || result.first_air_date).getFullYear()}
+                              {new Date(result.release_date || result.first_air_date || new Date()).getFullYear()}
                             </p>
                             <p className="tmdb-type">
                               {result.media_type === 'movie' ? 'Movie' : 'TV Series'}
                             </p>
                             <button
-                              onClick={() => autoFillFromTMDB(result)}
+                              onClick={() => handleImportFromTMDB(result)}
                               className="use-result-button"
+                              disabled={isLoading}
                             >
-                              Use This
+                              {isLoading ? 'Importing...' : 'Import with Actors'}
                             </button>
                           </div>
                         </div>
@@ -760,9 +698,10 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Форма добавления/редактирования лакорна */}
+            {/* Форма добавления/редактирования лакорна (ручное создание) */}
             <div className="lacorn-form-section">
-              <h3>{editingLacorn ? 'Edit Lacorn' : 'Add New Lacorn'}</h3>
+              <h3>{editingLacorn ? 'Edit Lacorn' : 'Add New Lacorn Manually'}</h3>
+              <p className="form-note">Note: Use TMDB import above for automatic actor fetching</p>
               <form onSubmit={editingLacorn ? handleUpdateLacorn : handleAddLacorn} className="lacorn-form">
                 {/* Title and Release Year */}
                 <div className="form-row">
@@ -799,7 +738,7 @@ const Profile = () => {
                   />
                 </div>
 
-                {/* Episodes, Duration, and Rating */}
+                {/* Status */}
                 <div className="form-row">
                   <div className="form-field-group">
                     <label className="form-label">Status</label>
@@ -814,54 +753,56 @@ const Profile = () => {
                   </div>
                 </div>
 
-               <div className="form-field-group">
-                 <label className="form-label">Available Voiceovers</label>
-                 <div className="voiceovers-checkboxes">
-                   <label className="checkbox-label">
-                     <input
-                       type="checkbox"
-                       checked={(newLacorn.availableVoiceovers || []).includes('RUSSIAN_DUB')}
-                       onChange={(e) => {
-                         const currentVoiceovers = newLacorn.availableVoiceovers || [];
-                         const voiceovers = e.target.checked
-                           ? [...currentVoiceovers, 'RUSSIAN_DUB']
-                           : currentVoiceovers.filter(v => v !== 'RUSSIAN_DUB');
-                         setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
-                       }}
-                     />
-                     Russian Dubbed
-                   </label>
-                   <label className="checkbox-label">
-                     <input
-                       type="checkbox"
-                       checked={(newLacorn.availableVoiceovers || []).includes('ORIGINAL_SUBBED')}
-                       onChange={(e) => {
-                         const currentVoiceovers = newLacorn.availableVoiceovers || [];
-                         const voiceovers = e.target.checked
-                           ? [...currentVoiceovers, 'ORIGINAL_SUBBED']
-                           : currentVoiceovers.filter(v => v !== 'ORIGINAL_SUBBED');
-                         setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
-                       }}
-                     />
-                     Original with Subs
-                   </label>
-                   <label className="checkbox-label">
-                     <input
-                       type="checkbox"
-                       checked={(newLacorn.availableVoiceovers || []).includes('ENGLISH_DUB')}
-                       onChange={(e) => {
-                         const currentVoiceovers = newLacorn.availableVoiceovers || [];
-                         const voiceovers = e.target.checked
-                           ? [...currentVoiceovers, 'ENGLISH_DUB']
-                           : currentVoiceovers.filter(v => v !== 'ENGLISH_DUB');
-                         setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
-                       }}
-                     />
-                     English Dubbed
-                   </label>
-                 </div>
-               </div>
+                {/* Voiceovers */}
+                <div className="form-field-group">
+                  <label className="form-label">Available Voiceovers</label>
+                  <div className="voiceovers-checkboxes">
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={(newLacorn.availableVoiceovers || []).includes('RUSSIAN_DUB')}
+                        onChange={(e) => {
+                          const currentVoiceovers = newLacorn.availableVoiceovers || [];
+                          const voiceovers = e.target.checked
+                            ? [...currentVoiceovers, 'RUSSIAN_DUB']
+                            : currentVoiceovers.filter(v => v !== 'RUSSIAN_DUB');
+                          setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
+                        }}
+                      />
+                      Russian Dubbed
+                    </label>
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={(newLacorn.availableVoiceovers || []).includes('ORIGINAL_SUBBED')}
+                        onChange={(e) => {
+                          const currentVoiceovers = newLacorn.availableVoiceovers || [];
+                          const voiceovers = e.target.checked
+                            ? [...currentVoiceovers, 'ORIGINAL_SUBBED']
+                            : currentVoiceovers.filter(v => v !== 'ORIGINAL_SUBBED');
+                          setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
+                        }}
+                      />
+                      Original with Subs
+                    </label>
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={(newLacorn.availableVoiceovers || []).includes('ENGLISH_DUB')}
+                        onChange={(e) => {
+                          const currentVoiceovers = newLacorn.availableVoiceovers || [];
+                          const voiceovers = e.target.checked
+                            ? [...currentVoiceovers, 'ENGLISH_DUB']
+                            : currentVoiceovers.filter(v => v !== 'ENGLISH_DUB');
+                          setNewLacorn({...newLacorn, availableVoiceovers: voiceovers});
+                        }}
+                      />
+                      English Dubbed
+                    </label>
+                  </div>
+                </div>
 
+                {/* Episodes, Duration, Rating */}
                 <div className="form-row">
                   <div className="form-field-group">
                     <label className="form-label">Total Episodes</label>
@@ -927,35 +868,6 @@ const Profile = () => {
                     />
                   </div>
                   <div className="form-field-group">
-                    <label className="form-label">Production Countries</label>
-                    <input
-                      type="text"
-                      placeholder="USA, Japan, South Korea"
-                      value={newLacorn.productionCountries?.join(', ') || ''}
-                      onChange={(e) => setNewLacorn({
-                        ...newLacorn,
-                        productionCountries: e.target.value.split(',').map(c => c.trim())
-                      })}
-                    />
-                  </div>
-
-                  {/* Actors Info */}
-                  {newLacorn.actors && newLacorn.actors.length > 0 && (
-                    <div className="form-field-group">
-                      <label className="form-label">Actors from TMDB</label>
-                      <div className="actors-list">
-                        {newLacorn.actors.slice(0, 5).map((actor, index) => (
-                          <div key={index} className="actor-item">
-                            <strong>{actor.name}</strong> as {actor.character}
-                          </div>
-                        ))}
-                        {newLacorn.actors.length > 5 && (
-                          <div>... and {newLacorn.actors.length - 5} more</div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                  <div className="form-field-group">
                     <label className="form-label">Age Rating</label>
                     <select
                       value={newLacorn.ageRating}
@@ -986,6 +898,7 @@ const Profile = () => {
             {/* Список существующих лакорнов */}
             <div className="lacorns-list-section">
               <h3>Existing Lacorns</h3>
+              {error && <div className="error-message">{error}</div>}
               <div className="lacorns-grid-admin">
                 {Array.isArray(lacorns) && lacorns.map(lacorn => (
                   <div key={lacorn.id} className="lacorn-card-admin">
@@ -1011,6 +924,9 @@ const Profile = () => {
                         Voiceovers: {lacorn.availableVoiceovers?.join(', ') || 'None'}
                       </p>
                       <p className="lacorn-rating">⭐ {lacorn.rating || 'N/A'}</p>
+                      <div className="lacorn-actors-count">
+                        👥 Actors: {lacorn.actors?.length || 0}
+                      </div>
                       <div className="lacorn-actions">
                         <button
                           onClick={() => handleEditLacorn(lacorn)}
@@ -1030,9 +946,9 @@ const Profile = () => {
                 ))}
               </div>
 
-              {(!Array.isArray(lacorns) || lacorns.length === 0) && (
+              {(!Array.isArray(lacorns) || lacorns.length === 0) && !error && (
                 <div className="empty-state">
-                  <p>No lacorns found. Add your first lacorn!</p>
+                  <p>No lacorns found. Use TMDB import above to add your first lacorn!</p>
                 </div>
               )}
             </div>
@@ -1050,6 +966,10 @@ const Profile = () => {
                   <img src="/images/icons/my-profile.png" alt="Profile" className="menu-modal-button-icon" />
                   My profile
                 </button>
+                <button className="menu-modal-button" onClick={() => navigate('/actors')}>
+                    <img src="/images/icons/actors.png" alt="Actors" className="menu-modal-button-icon" />
+                    Actors
+                  </button>
                 <button className="menu-modal-button" onClick={() => navigate('/collections/favourites')}>
                   <img src="/images/icons/favourite.png" alt="Favourites" className="menu-modal-button-icon" />
                   Favourites
@@ -1076,7 +996,7 @@ const Profile = () => {
             </div>
             <div className="menu-modal-footer">
               <button className="leave-page-button" onClick={handleLeavePage}>
-                <img src="/images/icons/leave-page.png" alt="Main page" className="menu-modal-button-icon" />
+                <img src="/images/icons/leave-page.png" alt="Leave page" className="menu-modal-button-icon" />
                 Leave page
               </button>
             </div>

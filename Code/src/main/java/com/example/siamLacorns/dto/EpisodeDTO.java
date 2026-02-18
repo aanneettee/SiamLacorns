@@ -1,5 +1,7 @@
 package com.example.siamLacorns.dto;
 
+import com.example.siamLacorns.model.Episode;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,12 +21,16 @@ public class EpisodeDTO {
     // Конструкторы, геттеры и сеттеры
     public EpisodeDTO() {}
 
-    public EpisodeDTO(Long id, String title, Integer episodeNumber, Integer seasonNumber, String videoUrl) {
-        this.id = id;
-        this.title = title;
-        this.episodeNumber = episodeNumber;
-        this.seasonNumber = seasonNumber;
-        this.videoUrl = videoUrl;
+    public EpisodeDTO(Episode episode) {
+        this.id = episode.getId();
+        this.title = episode.getTitle();
+        this.description = episode.getDescription();
+        this.episodeNumber = episode.getEpisodeNumber();
+        this.seasonNumber = episode.getSeasonNumber();
+        this.videoUrl = episode.getVideoUrl();
+        this.duration = episode.getDuration();
+        this.watched = false;
+        this.currentTime = 0;
     }
 
     // Геттеры и сеттеры

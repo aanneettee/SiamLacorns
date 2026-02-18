@@ -1,6 +1,5 @@
 package com.example.siamLacorns.repository;
 
-
 import com.example.siamLacorns.model.UserWatchHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,16 +14,26 @@ public interface UserWatchHistoryRepository extends JpaRepository<UserWatchHisto
 
     Optional<UserWatchHistory> findByUserIdAndLacornId(Long userId, Long lacornId);
 
+    List<UserWatchHistory> findByUserId(Long userId);
+
     List<UserWatchHistory> findByUserIdOrderByLastWatchedDesc(Long userId);
 
-    @Query("SELECT wh FROM UserWatchHistory wh WHERE wh.user.id = :userId AND wh.isCompleted = false ORDER BY wh.lastWatched DESC")
+    Optional<UserWatchHistory> findByUserIdAndEpisodeId(Long userId, Long episodeId);
+
+    @Query("SELECT wh FROM UserWatchHistory wh WHERE wh.user.id = :userId AND wh.completed = false ORDER BY wh.lastWatched DESC")
     List<UserWatchHistory> findInProgressByUserId(@Param("userId") Long userId);
 
-    @Query("SELECT wh FROM UserWatchHistory wh WHERE wh.user.id = :userId AND wh.isCompleted = true ORDER BY wh.lastWatched DESC")
+    List<UserWatchHistory> findByLacornId(Long lacornId);
+
+    @Query("SELECT wh FROM UserWatchHistory wh WHERE wh.user.id = :userId AND wh.completed = true ORDER BY wh.lastWatched DESC")
     List<UserWatchHistory> findCompletedByUserId(@Param("userId") Long userId);
+
+    List<UserWatchHistory> findByUserIdAndCompletedFalse(Long userId);
 
     boolean existsByUserIdAndLacornId(Long userId, Long lacornId);
 
-    @Query("SELECT COUNT(wh) FROM UserWatchHistory wh WHERE wh.lacorn.id = :lacornId AND wh.isCompleted = true")
+    void deleteByLacornId(Long lacornId);
+
+    @Query("SELECT COUNT(wh) FROM UserWatchHistory wh WHERE wh.lacorn.id = :lacornId AND wh.completed = true")
     Long countCompletedViewsByLacornId(@Param("lacornId") Long lacornId);
 }

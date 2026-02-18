@@ -229,7 +229,8 @@ const LacornDetail = () => {
           <div className="actors-content">
             <div className="actors-grid">
               {actors.map(actor => (
-                <div key={actor.id} className="actor-card">
+                <div key={actor.id} className="actor-card clickable"
+                onClick={()=> navigate(`/actors/${actor.id}`)}>
                   <div className="actor-photo">
                     <img
                       src={actor.photoUrl || '/images/default-avatar.png'}
@@ -241,9 +242,12 @@ const LacornDetail = () => {
                   </div>
                   <div className="actor-info">
                     <h4>{actor.name}</h4>
-                    {actor.nationality && (
-                      <p className="actor-nationality">{actor.nationality}</p>
-                    )}
+                    {actor.characterName && (
+                                  <p className="actor-character">в роли: {actor.characterName}</p>
+                                )}
+                                {actor.nationality && (
+                                  <p className="actor-nationality">{actor.nationality}</p>
+                                )}
                   </div>
                 </div>
               ))}

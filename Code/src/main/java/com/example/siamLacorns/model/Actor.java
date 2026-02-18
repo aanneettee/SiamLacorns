@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class Actor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @Column(columnDefinition = "TEXT")
@@ -29,7 +30,7 @@ public class Actor {
     private String photoUrl;
 
     @Column(name = "birth_date")
-    private java.time.LocalDate birthDate;
+    private LocalDate birthDate;
 
     private String nationality;
 
@@ -39,6 +40,19 @@ public class Actor {
     @Column(name = "height_cm")
     private Integer heightCm;
 
-    @ManyToMany(mappedBy = "actors")
+    @ManyToMany(mappedBy = "actors", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Lacorn> lacorns = new ArrayList<>();
+
+    // Вспомогательные методы для двунаправленной связи
+    public void addLacorn(Lacorn lacorn) {
+        if (!lacorns.contains(lacorn)) {
+            lacorns.add(lacorn);
+            lacorn.getActors().add(this);
+        }
+    }
+
+    public void removeLacorn(Lacorn lacorn) {
+        lacorns.remove(lacorn);
+        lacorn.getActors().remove(this);
+    }
 }

@@ -289,4 +289,27 @@
     gap: 15px;
     text-align: center;
   }
+
+  /* Добавить в конец LacornDetail.css */
+
+  .actor-card.clickable {
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+  }
+
+  .actor-card.clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+    border-color: #ff6b6b;
+  }
+
+  .actor-character {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin: 5px 0;
+    font-style: italic;
+  }
 }

@@ -1,4 +1,4 @@
-// LacornWatchPage.js (исправленная версия)
+// LacornWatchPage.js (исправленная версия с трейлером)
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { lacornService, userCollectionService } from '../../services/lacorns';
@@ -9,7 +9,7 @@ import './LacornWatchPage.css';
 const LacornWatchPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, token } = useAuth(); // Добавляем token
+  const { user, token } = useAuth();
 
   const [lacorn, setLacorn] = useState(null);
   const [episodes, setEpisodes] = useState([]);
@@ -22,6 +22,7 @@ const LacornWatchPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const [showTrailer, setShowTrailer] = useState(false);
 
   useEffect(() => {
     loadLacornData();
@@ -30,69 +31,80 @@ const LacornWatchPage = () => {
   useEffect(() => {
     if (selectedEpisode) {
       loadVideoUrl();
+      setShowTrailer(false);
+    } else {
+      setShowTrailer(true);
+      if (lacorn?.trailerUrl) {
+        setVideoUrl(formatTrailerUrl(lacorn.trailerUrl));
+      } else {
+        setVideoUrl('');
+      }
     }
-  }, [selectedEpisode, selectedVoicecover]);
+  }, [selectedEpisode, selectedVoicecover, lacorn]);
 
- const loadLacornData = async () => {
-   try {
-     setLoading(true);
-     setError(null);
+  const formatTrailerUrl = (url) => {
+    if (!url) return '';
 
-    console.log('Current ID:', id);
-    console.log('User:', user);
-    console.log('Token:', token);
-     // Создаем конфиг с заголовками
-     const config = {
-       headers: {
-         ...(token && { Authorization: `Bearer ${token}` }),
-         ...(user?.id && { 'X-User-Id': user.id.toString() })
-       }
-     };
+    if (url.includes('youtube.com/watch') || url.includes('youtu.be')) {
+      let videoId = '';
+      if (url.includes('youtube.com/watch')) {
+        const urlParams = new URLSearchParams(new URL(url).search);
+        videoId = urlParams.get('v');
+      } else if (url.includes('youtu.be')) {
+        videoId = url.split('/').pop();
+      }
 
-     console.log('Loading lacorn data for ID:', id);
-     console.log('Config:', config);
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    }
 
-     // Загружаем данные последовательно для отладки
-     const lacornData = await lacornService.getLacornById(id, config);
-     console.log('Lacorn data loaded:', lacornData);
+    return url;
+  };
 
-     const episodesData = await lacornService.getEpisodes(id, config);
-     console.log('Episodes data loaded:', episodesData);
+  const loadLacornData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-     const actorsData = await lacornService.getActors(id, config);
-     console.log('Actors data loaded:', actorsData);
+      const config = {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(user?.id && { 'X-User-Id': user.id.toString() })
+        }
+      };
 
-     setLacorn(lacornData);
-     setEpisodes(episodesData || []);
-     setActors(actorsData || []);
+      const lacornData = await lacornService.getLacornById(id, config);
+      const episodesData = await lacornService.getEpisodes(id, config);
+      const actorsData = await lacornService.getActors(id, config);
 
-     // Автоматически выбираем первый эпизод
-     if (episodesData && episodesData.length > 0) {
-       const firstEpisode = episodesData[0];
-       setSelectedEpisode(firstEpisode);
-       console.log('Selected first episode:', firstEpisode);
+      setLacorn(lacornData);
+      setEpisodes(episodesData || []);
+      setActors(actorsData || []);
 
-       // Определяем первый сезон
-       const firstSeason = firstEpisode.seasonNumber || 1;
-       setSelectedSeason(firstSeason);
-     } else {
-       console.warn('No episodes found for lacorn:', id);
-     }
+      if (episodesData && episodesData.length > 0) {
+        const firstEpisode = episodesData[0];
+        setSelectedEpisode(firstEpisode);
 
-   } catch (err) {
-     console.error('Error loading lacorn data:', err);
-     console.error('Error details:', err.response?.data);
-     setError(err.response?.data?.message || 'Ошибка при загрузке данных для просмотра');
-   } finally {
-     setLoading(false);
-   }
- };
+        const firstSeason = firstEpisode.seasonNumber || 1;
+        setSelectedSeason(firstSeason);
+      } else {
+        setShowTrailer(true);
+        if (lacornData.trailerUrl) {
+          setVideoUrl(formatTrailerUrl(lacornData.trailerUrl));
+        }
+      }
+
+    } catch (err) {
+      console.error('Error loading lacorn data:', err);
+      setError(err.response?.data?.message || 'Ошибка при загрузке данных для просмотра');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadVideoUrl = async () => {
     if (!selectedEpisode) return;
 
     try {
-      // Создаем конфиг для авторизованных запросов
       const config = token ? {
         headers: { Authorization: `Bearer ${token}` }
       } : {};
@@ -105,13 +117,13 @@ const LacornWatchPage = () => {
       setVideoUrl(videoData);
     } catch (err) {
       console.error('Error loading video URL:', err);
-      // Используем прямой URL если API не работает
       setVideoUrl(selectedEpisode.videoUrl || '');
     }
   };
 
   const handleEpisodeSelect = (episode) => {
     setSelectedEpisode(episode);
+    setShowTrailer(false);
   };
 
   const handleAddToCollection = async (collectionName) => {
@@ -154,7 +166,6 @@ const LacornWatchPage = () => {
         completed: true
       }, token);
 
-      // Автоматический переход к следующему эпизоду
       const currentIndex = episodes.findIndex(ep => ep.id === selectedEpisode.id);
       if (currentIndex < episodes.length - 1) {
         handleEpisodeSelect(episodes[currentIndex + 1]);
@@ -230,6 +241,11 @@ const LacornWatchPage = () => {
             Актёры: {actors.slice(0, 3).map(actor => actor.name).join(', ')}
             {actors.length > 3 && ` и ещё ${actors.length - 3}`}
           </div>
+          {lacorn.trailerUrl && (
+            <div className="info-line trailer-indicator">
+              🎬 Трейлер доступен
+            </div>
+          )}
         </div>
       </div>
 
@@ -244,32 +260,87 @@ const LacornWatchPage = () => {
       {/* Video Player Section */}
       <div className="player-section">
         <div className="video-container">
-          {selectedEpisode && videoUrl ? (
+          {videoUrl ? (
             <div className="video-player-wrapper">
-              <video
-                key={`${selectedEpisode.id}-${selectedVoicecover}`}
-                controls
-                autoPlay
-                onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
-                onEnded={handleVideoEnd}
-                className="video-element"
-              >
-                <source src={videoUrl} type="video/mp4" />
-                Ваш браузер не поддерживает видео тег.
-              </video>
+              {showTrailer ? (
+                videoUrl.includes('youtube.com/embed') ? (
+                  <iframe
+                    src={videoUrl}
+                    title={`${lacorn.title} - Трейлер`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="video-iframe"
+                  ></iframe>
+                ) : (
+                  <video
+                    key="trailer"
+                    controls
+                    autoPlay
+                    className="video-element"
+                  >
+                    <source src={videoUrl} type="video/mp4" />
+                    Ваш браузер не поддерживает видео тег.
+                  </video>
+                )
+              ) : (
+                <video
+                  key={`${selectedEpisode?.id}-${selectedVoicecover}`}
+                  controls
+                  autoPlay
+                  onTimeUpdate={(e) => handleTimeUpdate(e.target.currentTime)}
+                  onEnded={handleVideoEnd}
+                  className="video-element"
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                  Ваш браузер не поддерживает видео тег.
+                </video>
+              )}
+
               <div className="video-info">
-                <h4>
-                  {selectedEpisode.seasonNumber || 1}x{selectedEpisode.episodeNumber?.toString().padStart(2, '0') || '01'} - {selectedEpisode.title}
-                </h4>
-                {selectedEpisode.description && (
-                  <p>{selectedEpisode.description}</p>
+                {showTrailer ? (
+                  <>
+                    <h4>🎬 Трейлер: {lacorn.title}</h4>
+                    {lacorn.trailerUrl && (
+                      <p>
+                        <a
+                          href={lacorn.trailerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="trailer-link"
+                        >
+                          Смотреть на YouTube
+                        </a>
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  selectedEpisode && (
+                    <>
+                      <h4>
+                        {selectedEpisode.seasonNumber || 1}x{selectedEpisode.episodeNumber?.toString().padStart(2, '0') || '01'} - {selectedEpisode.title}
+                      </h4>
+                      {selectedEpisode.description && (
+                        <p>{selectedEpisode.description}</p>
+                      )}
+                    </>
+                  )
                 )}
               </div>
             </div>
           ) : (
             <div className="video-placeholder">
-              <p>Выберите эпизод для начала просмотра</p>
-              <p>🎬 📺 🍿</p>
+              {showTrailer && !lacorn.trailerUrl ? (
+                <>
+                  <p>Трейлер недоступен</p>
+                  <p>Выберите эпизод для начала просмотра</p>
+                </>
+              ) : (
+                <>
+                  <p>Выберите эпизод для начала просмотра</p>
+                  <p>🎬 📺 🍿</p>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -319,25 +390,27 @@ const LacornWatchPage = () => {
           </div>
 
           {/* Voiceover Selector */}
-          <div className="control-group">
-            <button className="control-button">
-              Озвучка: {selectedVoicecover === 'subbed' ? 'Субтитры' : 'Дубляж'} ▼
-            </button>
-            <div className="dropdown-content">
-              <button
-                onClick={() => setSelectedVoicecover('subbed')}
-                className={`dropdown-item ${selectedVoicecover === 'subbed' ? 'active' : ''}`}
-              >
-                🇺🇸 Субтитры
+          {selectedEpisode && (
+            <div className="control-group">
+              <button className="control-button">
+                Озвучка: {selectedVoicecover === 'subbed' ? 'Субтитры' : 'Дубляж'} ▼
               </button>
-              <button
-                onClick={() => setSelectedVoicecover('dubbed')}
-                className={`dropdown-item ${selectedVoicecover === 'dubbed' ? 'active' : ''}`}
-              >
-                🇷🇺 Дубляж
-              </button>
+              <div className="dropdown-content">
+                <button
+                  onClick={() => setSelectedVoicecover('subbed')}
+                  className={`dropdown-item ${selectedVoicecover === 'subbed' ? 'active' : ''}`}
+                >
+                  🇺🇸 Субтитры
+                </button>
+                <button
+                  onClick={() => setSelectedVoicecover('dubbed')}
+                  className={`dropdown-item ${selectedVoicecover === 'dubbed' ? 'active' : ''}`}
+                >
+                  🇷🇺 Дубляж
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Watch Progress */}
           {selectedEpisode?.currentTime > 0 && (
@@ -355,6 +428,20 @@ const LacornWatchPage = () => {
                 ></div>
               </div>
             </div>
+          )}
+
+          {/* Trailer Button */}
+          {lacorn.trailerUrl && !showTrailer && (
+            <button
+              className="trailer-button"
+              onClick={() => {
+                setSelectedEpisode(null);
+                setShowTrailer(true);
+                setVideoUrl(formatTrailerUrl(lacorn.trailerUrl));
+              }}
+            >
+              🎬 Смотреть трейлер
+            </button>
           )}
         </div>
       </div>

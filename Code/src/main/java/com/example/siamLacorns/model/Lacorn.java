@@ -15,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "lacorns")
 public class Lacorn {
-    // Геттеры и сеттеры
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +32,7 @@ public class Lacorn {
     private Integer totalEpisodes;
 
     @Column(name = "episode_duration")
-    private Integer episodeDuration; // в минутах
+    private Integer episodeDuration;
 
     @Column(name = "poster_url")
     private String posterUrl;
@@ -54,14 +53,6 @@ public class Lacorn {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // В классе Lacorn нужно добавить:
-/*
-    @ElementCollection
-    @CollectionTable(name = "lacorn_voiceovers", joinColumns = @JoinColumn(name = "lacorn_id"))
-    @Column(name = "voiceover")
-*/
-//    private List<String> availableVoiceovers = new ArrayList<>();
-
     @ElementCollection
     @CollectionTable(name = "lacorn_production_countries", joinColumns = @JoinColumn(name = "lacorn_id"))
     @Column(name = "country")
@@ -70,19 +61,30 @@ public class Lacorn {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "lacorn", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "lacorn", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Episode> episodes = new ArrayList<>();
 
     @OneToMany(mappedBy = "lacorn", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserWatchHistory> watchHistories = new ArrayList<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "lacorn_actors",
             joinColumns = @JoinColumn(name = "lacorn_id"),
             inverseJoinColumns = @JoinColumn(name = "actor_id")
     )
     private List<Actor> actors = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private SeriesStatus status;
+
+    @Column(name = "tmdb_id", unique = true)
+    private Long tmdbId;
+
+    public enum SeriesStatus {
+        ONGOING, COMPLETED, UPCOMING, RELEASED, CANCELLED, IN_PRODUCTION
+    }
 
     public Lacorn(String title, String description, Integer releaseYear,
                   Integer totalEpisodes, Integer episodeDuration) {
@@ -94,13 +96,11 @@ public class Lacorn {
         this.episodeDuration = episodeDuration;
     }
 
-
     @PreUpdate
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Вспомогательные методы
     public void addGenre(String genre) {
         if (!genres.contains(genre)) {
             genres.add(genre);
@@ -123,17 +123,4 @@ public class Lacorn {
         episodes.add(episode);
         episode.setLacorn(this);
     }
-
-    // ДОБАВИТЬ в класс Lacorn:
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private SeriesStatus status; // ONGOING, COMPLETED, UPCOMING
-
-    public enum SeriesStatus {
-        ONGOING, COMPLETED, UPCOMING
-    }
-
-    // В класс Lacorn.java добавьте:
-    @Column(name = "tmdb_id", unique = true)
-    private Long tmdbId;
 }

@@ -435,6 +435,10 @@ const Home = () => {
                                     <img src="/images/icons/my-profile.png" alt="Profile" className="menu-modal-button-icon" />
                                     My profile
                                 </button>
+                                <button className="menu-modal-button" onClick={() => navigate('/actors')}>
+                                    <img src="/images/icons/actors.png" alt="Actors" className="menu-modal-button-icon" />
+                                    Actors
+                                  </button>
                                 <button className="menu-modal-button"
                                     onClick={() => navigate('/collections/favourites')}>
                                     <img src="/images/icons/favourite.png" alt="Favourites" className="menu-modal-button-icon" />

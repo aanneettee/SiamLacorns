@@ -1,7 +1,7 @@
-// ActorPage.js
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { actorService } from '../../services/actors';
+import { lacornService } from '../../services/lacorns'; // Добавить импорт
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import './ActorPage.css';
@@ -12,8 +12,7 @@ const ActorPage = () => {
     const { user } = useAuth();
 
     const [actor, setActor] = useState(null);
-    // const [lacorns, setLacorns] = useState([]);
-    // const [filmography, setFilmography] = useState([]);
+    const [filmography, setFilmography] = useState([]); // Добавить состояние для фильмографии
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
@@ -25,15 +24,16 @@ const ActorPage = () => {
     const loadActorData = async () => {
         try {
             setLoading(true);
-            const [actorData/* , lacornsData, filmographyData */] = await Promise.all([
-                actorService.getActorById(id),
-                // actorService.getLacorns(id),
-                // actorService.getFilmography(id)
-            ]);
 
+            // Загружаем информацию об актёре
+            const actorData = await actorService.getActorById(id);
             setActor(actorData);
-            // setLacorns(lacornsData);
-            // setFilmography(filmographyData);
+
+            // Загружаем фильмографию актёра (все лакорны с его участием)
+            // Предполагается, что у вас есть такой метод в lacornService
+            const actorFilms = await lacornService.getLacornsByActorId(id);
+            setFilmography(actorFilms);
+
         } catch (err) {
             setError('Ошибка при загрузке данных актёра');
             console.error('Error loading actor data:', err);
@@ -42,14 +42,26 @@ const ActorPage = () => {
         }
     };
 
-    //  ФУНКЦИЯ ДЛЯ ВОЗВРАТА К СПИСКУ АКТЁРОВ
     const handleBackToActors = () => {
-        navigate('/lacorns'); // Возврат к каталогу
+        navigate('/actors');
     };
 
-    // const handleLacornClick = (lacornId) => {
-    //   navigate(`/lacorn/${lacornId}`);
-    // };
+    const handleLacornClick = (lacornId) => {
+        navigate(`/lacorns/${lacornId}`);
+    };
+
+    // Функция для вычисления возраста
+    const calculateAge = (birthDate) => {
+        if (!birthDate) return null;
+        const birth = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const m = today.getMonth() - birth.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
+    };
 
     if (loading) {
         return (
@@ -63,7 +75,7 @@ const ActorPage = () => {
         return (
             <div className="error-container">
                 <h2>{error || 'Актёр не найден'}</h2>
-                <button onClick={() => navigate('/lacorns')} className="back-button">
+                <button onClick={() => navigate('/actors')} className="back-button">
                     ← Вернуться к списку
                 </button>
             </div>
@@ -72,7 +84,6 @@ const ActorPage = () => {
 
     return (
         <div className="actor-detail">
-            {/*  КНОПКА ВОЗВРАТА К СПИСКУ АКТЁРОВ */}
             <button
                 onClick={handleBackToActors}
                 className="back-button"
@@ -81,7 +92,6 @@ const ActorPage = () => {
                 ← Назад к списку актёров
             </button>
 
-            {/* Хедер с фото и основной информацией */}
             <div className="actor-header">
                 <div className="actor-photo-large">
                     <img
@@ -96,16 +106,20 @@ const ActorPage = () => {
                 <div className="actor-info">
                     <h1>{actor.name}</h1>
                     <div className="actor-meta">
-                        <span className="age">🎂 {Math.floor((Date.now() - new Date(actor.birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25))} лет</span>
+                        {actor.birthDate && (
+                            <span className="age">🎂 {calculateAge(actor.birthDate)} лет</span>
+                        )}
                         <span className="nationality">🌍 {actor.nationality || 'N/A'}</span>
-                        <span className="height">📏 {actor.heightCm}</span>
+                        {actor.heightCm && (
+                            <span className="height">📏 {actor.heightCm} см</span>
+                        )}
                     </div>
 
-                    <div className="actor-roles">
-                        {actor.characterName && [actor.characterName].map((role, index) => (
-                            <span key={index} className="role-tag">{role}</span>
-                        ))}
-                    </div>
+                    {actor.characterName && (
+                        <div className="actor-roles">
+                            <span className="role-tag">Известен по роли: {actor.characterName}</span>
+                        </div>
+                    )}
 
                     <div className="actor-actions">
                         <button
@@ -118,7 +132,6 @@ const ActorPage = () => {
                 </div>
             </div>
 
-            {/* Табы с дополнительной информацией */}
             <div className="actor-tabs">
                 <button
                     className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
@@ -126,23 +139,14 @@ const ActorPage = () => {
                 >
                     Обзор
                 </button>
-
-                {/*<button
-          className={`tab ${activeTab === 'lacorns' ? 'active' : ''}`}
-          onClick={() => setActiveTab('lacorns')}
-        >
-          Сериалы ({lacorns.length})
-        </button>
-
-        <button
-          className={`tab ${activeTab === 'filmography' ? 'active' : ''}`}
-          onClick={() => setActiveTab('filmography')}
-        >
-          Фильмография ({filmography.length})
-        </button>*/}
+                <button
+                    className={`tab ${activeTab === 'filmography' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('filmography')}
+                >
+                    Фильмография ({filmography.length})
+                </button>
             </div>
 
-            {/* Контент табов */}
             <div className="tab-content">
                 {activeTab === 'overview' && (
                     <div className="overview-content">
@@ -157,7 +161,7 @@ const ActorPage = () => {
                                 <strong>Национальность:</strong> {actor.nationality || 'N/A'}
                             </div>
                             <div className="detail-item">
-                                <strong>Рост:</strong> {actor.heightCm || 'N/A'}
+                                <strong>Рост:</strong> {actor.heightCm ? `${actor.heightCm} см` : 'N/A'}
                             </div>
                         </div>
 
@@ -169,87 +173,49 @@ const ActorPage = () => {
                                 </p>
                             </div>
                         )}
+                    </div>
+                )}
 
-                        {actor.awards && actor.awards.length > 0 && (
-                            <div className="awards-section">
-                                <h3>Награды и номинации</h3>
-                                <ul className="awards-list">
-                                    {actor.awards.map((award, index) => (
-                                        <li key={index} className="award-item">
-                                            <span className="award-year">{award.year}</span>
-                                            <span className="award-title">{award.title}</span>
-                                            <span className="award-category">{award.category}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                {activeTab === 'filmography' && (
+                    <div className="filmography-content">
+                        <h3>Все лакорны с участием {actor.name}</h3>
+                        {filmography.length > 0 ? (
+                            <div className="filmography-grid">
+                                {filmography.map(lacorn => (
+                                    <div
+                                        key={lacorn.id}
+                                        className="filmography-card"
+                                        onClick={() => handleLacornClick(lacorn.id)}
+                                    >
+                                        <div className="filmography-poster">
+                                            <img
+                                                src={lacorn.posterUrl || '/images/default-poster.webp'}
+                                                alt={lacorn.title}
+                                                onError={(e) => {
+                                                    e.target.src = '/images/default-poster.webp';
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="filmography-info">
+                                            <h4>{lacorn.title}</h4>
+                                            <p className="filmography-year">{lacorn.releaseYear}</p>
+                                            <div className="filmography-meta">
+                                                <span className="rating">⭐ {lacorn.rating || 'N/A'}</span>
+                                                {lacorn.characterName && (
+                                                    <span className="character">в роли: {lacorn.characterName}</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-
-                        {actor.socialLinks && (
-                            <div className="social-section">
-                                <h3>Социальные сети</h3>
-                                <div className="social-links">
-                                    {actor.socialLinks.instagram && (
-                                        <a href={actor.socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="social-link">
-                                            Instagram
-                                        </a>
-                                    )}
-                                    {actor.socialLinks.twitter && (
-                                        <a href={actor.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="social-link">
-                                            Twitter
-                                        </a>
-                                    )}
-                                </div>
+                        ) : (
+                            <div className="no-films">
+                                <p>У этого актёра пока нет лакорнов в базе</p>
                             </div>
                         )}
                     </div>
                 )}
-
-                {/* activeTab === 'lacorns' && (
-          <div className="lacorns-content">
-            <div className="lacorns-grid">
-              {lacorns.map(lacorn => (
-                <div
-                  key={lacorn.id}
-                  className="lacorn-card"
-                  onClick={() => handleLacornClick(lacorn.id)}
-                >
-                  <div className="lacorn-poster-small">
-                    <img
-                      src={lacorn.posterUrl || '/images/default-poster.webp'}
-                      alt={lacorn.title}
-                    />
-                  </div>
-                  <div className="lacorn-card-info">
-                    <h4>{lacorn.title}</h4>
-                    <p className="character-name">Роль: {lacorn.characterName}</p>
-                    <div className="lacorn-card-meta">
-                      <span className="year">{lacorn.releaseYear}</span>
-                      <span className="rating">⭐ {lacorn.rating || 'N/A'}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) */}
-
-                {/* activeTab === 'filmography' && (
-          <div className="filmography-content">
-            <div className="filmography-list">
-              {filmography.map((work, index) => (
-                <div key={index} className="filmography-item">
-                  <div className="filmography-year">{work.year}</div>
-                  <div className="filmography-info">
-                    <h4>{work.title}</h4>
-                    <p className="filmography-role">{work.role}</p>
-                    <p className="filmography-type">{work.type === 'movie' ? 'Фильм' : 'Сериал'}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) */}
             </div>
         </div>
     );

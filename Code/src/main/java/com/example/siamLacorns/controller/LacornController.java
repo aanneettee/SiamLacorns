@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/lacorns")
 public class LacornController {
@@ -56,6 +57,12 @@ public class LacornController {
             Pageable pageable,
             @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         return lacornService.getAllLacorns(pageable, userId);
+    }
+
+    @GetMapping("/actor/{actorId}")
+    public ResponseEntity<List<LacornDTO>> getLacornsByActorId(@PathVariable Long actorId) {
+        List<LacornDTO> lacorns = lacornService.getLacornsByActorId(actorId);
+        return ResponseEntity.ok(lacorns);
     }
 
     // Поиск сериалов
@@ -225,4 +232,6 @@ public class LacornController {
             @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         return lacornService.getLacornsByGenreByRating(genre, userId);
     }
+
+
 }

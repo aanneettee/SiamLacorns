@@ -1,15 +1,19 @@
 // TMDBIntegrationService.java
 package com.example.siamLacorns.service;
 
+import com.example.siamLacorns.dto.ActorDTO;
 import com.example.siamLacorns.dto.TMDBLacornDTO;
+import com.example.siamLacorns.model.Actor;
 import com.example.siamLacorns.model.Lacorn;
+import com.example.siamLacorns.repository.ActorRepository;
 import com.example.siamLacorns.repository.LacornRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.example.siamLacorns.dto.ActorDTO;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +33,9 @@ public class TMDBIntegrationService {
 
     @Autowired
     private LacornRepository lacornRepository;
+
+    @Autowired
+    private ActorRepository actorRepository; // ДОБАВЛЕНО!
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -67,14 +74,9 @@ public class TMDBIntegrationService {
         }
     }
 
+    @Transactional
     public Lacorn importFromTMDB(TMDBLacornDTO tmdbData) {
-        // Проверяем, не существует ли уже сериал с таким tmdbId
-        Optional<Lacorn> existingLacorn = lacornRepository.findByTmdbId(tmdbData.getTmdbId());
-        if (existingLacorn.isPresent()) {
-            return existingLacorn.get();
-        }
-
-        // Создаем новый Lacorn из TMDB данных
+        // 1. Создаем объект лакорна и мапим основные поля
         Lacorn lacorn = new Lacorn();
         lacorn.setTitle(tmdbData.getTitle());
         lacorn.setDescription(tmdbData.getDescription());
@@ -87,31 +89,82 @@ public class TMDBIntegrationService {
         lacorn.setAgeRating(tmdbData.getAgeRating());
         lacorn.setRating(tmdbData.getRating());
         lacorn.setTmdbId(tmdbData.getTmdbId());
+        lacorn.setProductionCountries(tmdbData.getProductionCountries());
 
-        // Конвертируем статус
+        // Мапим статус
         if (tmdbData.getStatus() != null) {
-            switch (tmdbData.getStatus().toUpperCase()) {
-                case "RELEASED":
-                case "ENDED":
-                    lacorn.setStatus(Lacorn.SeriesStatus.COMPLETED);
-                    break;
-                case "RETURNING SERIES":
-                case "IN PRODUCTION":
-                    lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
-                    break;
-                case "PLANNED":
-                    lacorn.setStatus(Lacorn.SeriesStatus.UPCOMING);
-                    break;
-                default:
-                    lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
-            }
-        } else {
-            lacorn.setStatus(Lacorn.SeriesStatus.ONGOING);
+            lacorn.setStatus(mapSeriesStatus(tmdbData.getStatus()));
         }
 
+        // 2. Обработка актеров с проверкой уникальности
+        if (tmdbData.getActors() != null && !tmdbData.getActors().isEmpty()) {
+            List<Actor> actorEntities = tmdbData.getActors().stream()
+                    .map(actorDto -> {
+                        // Ищем актера в базе по имени
+                        return actorRepository.findByName(actorDto.getName())
+                                .map(existingActor -> {
+                                    // Если актер найден, обновляем данные, если они пустые
+                                    if (existingActor.getPhotoUrl() == null && actorDto.getPhotoUrl() != null) {
+                                        existingActor.setPhotoUrl(actorDto.getPhotoUrl());
+                                    }
+                                    if (existingActor.getBiography() == null && actorDto.getBiography() != null) {
+                                        existingActor.setBiography(actorDto.getBiography());
+                                    }
+                                    if (existingActor.getBirthDate() == null && actorDto.getBirthDate() != null) {
+                                        existingActor.setBirthDate(actorDto.getBirthDate());
+                                    }
+                                    if (existingActor.getNationality() == null && actorDto.getNationality() != null) {
+                                        existingActor.setNationality(actorDto.getNationality());
+                                    }
+                                    if (existingActor.getHeightCm() == null && actorDto.getHeightCm() != null) {
+                                        existingActor.setHeightCm(actorDto.getHeightCm());
+                                    }
+                                    return existingActor;
+                                })
+                                .orElseGet(() -> {
+                                    // Если актера нет, создаем новую сущность
+                                    Actor newActor = new Actor();
+                                    newActor.setName(actorDto.getName());
+                                    newActor.setPhotoUrl(actorDto.getPhotoUrl());
+                                    newActor.setBiography(actorDto.getBiography());
+                                    newActor.setBirthDate(actorDto.getBirthDate());
+                                    newActor.setNationality(actorDto.getNationality());
+                                    newActor.setCharacterName(actorDto.getCharacter());
+                                    newActor.setHeightCm(actorDto.getHeightCm());
+                                    return actorRepository.save(newActor);
+                                });
+                    })
+                    .collect(Collectors.toList());
+
+            lacorn.setActors(actorEntities);
+        }
+
+        // 3. Сохраняем лакорн
         return lacornRepository.save(lacorn);
     }
 
+    private Lacorn.SeriesStatus mapSeriesStatus(String tmdbStatus) {
+        if (tmdbStatus == null) return Lacorn.SeriesStatus.ONGOING;
+
+        switch (tmdbStatus) {
+            case "Released":
+            case "Ended":
+                return Lacorn.SeriesStatus.COMPLETED;
+            case "Returning Series":
+            case "In Production":
+                return Lacorn.SeriesStatus.ONGOING;
+            case "Planned":
+                return Lacorn.SeriesStatus.UPCOMING;
+            case "Canceled":
+                return Lacorn.SeriesStatus.CANCELLED; // если есть такое значение
+            default:
+                // Логируем неизвестный статус для отладки
+                System.out.println("Unknown TMDB status: " + tmdbStatus + ", defaulting to ONGOING");
+                return Lacorn.SeriesStatus.ONGOING;
+        }
+    }
+
+    @Transactional // ДОБАВЛЕНО
     public Lacorn autoImportFromTMDB(String title, Integer year) {
         // Ищем контент в TMDB
         List<TMDBLacornDTO> searchResults = searchContent(title, year);
@@ -122,10 +175,10 @@ public class TMDBIntegrationService {
         // Берем первый результат
         TMDBLacornDTO firstResult = searchResults.get(0);
 
-        // Получаем детальную информацию
+        // Получаем детальную информацию (с актёрами!)
         TMDBLacornDTO details = getContentDetails(firstResult.getTmdbId(), firstResult.getMediaType());
 
-        // Импортируем в базу
+        // Импортируем в базу (актёры сохранятся автоматически)
         return importFromTMDB(details);
     }
 
@@ -186,17 +239,17 @@ public class TMDBIntegrationService {
                     .collect(Collectors.toList()));
         }
 
-        // НОВОЕ: страны производства
+        // Страны производства
         if (detail.getProduction_countries() != null) {
             dto.setProductionCountries(Arrays.stream(detail.getProduction_countries())
                     .map(TMDBProductionCountry::getName)
                     .collect(Collectors.toList()));
         }
 
-        // НОВОЕ: актёры
+        // Актёры (первые 15 для полноты)
         if (detail.getCredits() != null && detail.getCredits().getCast() != null) {
             List<ActorDTO> actors = Arrays.stream(detail.getCredits().getCast())
-                    .limit(10) // Берем первых 10 актёров
+                    .limit(15) // Увеличил до 15 для лучшего покрытия
                     .map(this::convertToActorDTO)
                     .collect(Collectors.toList());
             dto.setActors(actors);
@@ -227,14 +280,11 @@ public class TMDBIntegrationService {
         return actorDTO;
     }
 
-
-
     // Внутренние классы для парсинга ответов TMDB
     private static class TMDBResponse {
         private TMDBResult[] results;
         public TMDBResult[] getResults() { return results; }
         public void setResults(TMDBResult[] results) { this.results = results; }
-
     }
 
     private static class TMDBResult {
@@ -247,7 +297,6 @@ public class TMDBIntegrationService {
         private String poster_path;
         private Double vote_average;
 
-        // Геттеры и сеттеры
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
         public String getMedia_type() { return media_type; }
@@ -285,7 +334,6 @@ public class TMDBIntegrationService {
         private TMDBProductionCountry[] production_countries;
         private TMDBCredits credits;
 
-        // Геттеры и сеттеры
         public Long getId() { return id; }
         public void setId(Long id) { this.id = id; }
         public String getTitle() { return title; }
@@ -319,7 +367,8 @@ public class TMDBIntegrationService {
         public TMDBProductionCountry[] getProduction_countries() { return production_countries; }
         public void setProduction_countries(TMDBProductionCountry[] production_countries) { this.production_countries = production_countries; }
         public TMDBCredits getCredits() { return credits; }
-        public void setCredits(TMDBCredits credits) { this.credits = credits; }}
+        public void setCredits(TMDBCredits credits) { this.credits = credits; }
+    }
 
     private static class TMDBGenre {
         private String name;
@@ -346,10 +395,8 @@ public class TMDBIntegrationService {
 
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
-
         public String getCharacter() { return character; }
         public void setCharacter(String character) { this.character = character; }
-
         public String getProfile_path() { return profile_path; }
         public void setProfile_path(String profile_path) { this.profile_path = profile_path; }
     }

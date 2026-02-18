@@ -3,6 +3,7 @@ package com.example.siamLacorns.dto;
 
 import com.example.siamLacorns.exception.ValidationException;
 import com.example.siamLacorns.model.Lacorn;
+import com.example.siamLacorns.dto.ActorDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

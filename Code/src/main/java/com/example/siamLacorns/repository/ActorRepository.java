@@ -15,6 +15,8 @@ public interface ActorRepository extends JpaRepository<Actor, Long> {
 
     Optional<Actor> findByName(String name);
 
+    boolean existsByName(String name);
+
     List<Actor> findByNameContainingIgnoreCase(String name);
 
     @Query("SELECT a FROM Actor a JOIN a.lacorns l WHERE l.id = :lacornId")
