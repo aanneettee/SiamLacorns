@@ -1,22 +1,18 @@
 # SiamLacorns
+
 SiamLacorns is a web service for watching Thai, Korean and Chinese TV series online.
 
-# About project
-Language: Java.
-Interface language: React.
 
-[SRS of program](/Documentation/Requirements/SRS.md)
+## About the project
 
-[User interface images](Documentation/Mockups)
+Backend: Spring Boot + Java.
 
-Diagrams
+Frontent: React + JS.
 
-Java code
 
-React code
+## Architecture (Lab 3)
 
-[Test plan](/TestPlan.md)
+- [report.md](docs/architecture/report.md).
 
-[Test result](/TestResults.md)
 
-Невдах Анна 350503
+350503: Невдах Анна, Мискевич Даниил, Крук Кирилл
