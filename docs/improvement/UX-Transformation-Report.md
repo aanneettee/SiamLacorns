@@ -361,6 +361,3 @@ https://github.com/[username]/siamlacorns/commit/c3d4e5f
 
 ---
 
-**[Ссылка на репозиторий с изменениями]**
-
----
