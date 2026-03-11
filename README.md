@@ -15,4 +15,9 @@ Frontent: React + JS.
 - [report.md](docs/architecture/report.md).
 
 
+## Tech Debt (Lab 5)
+
+- [report.md](docs/techdebt/report.md).
+
+
 350503: Невдах Анна, Мискевич Даниил, Крук Кирилл
