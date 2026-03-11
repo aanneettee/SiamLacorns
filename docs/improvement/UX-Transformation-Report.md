@@ -244,18 +244,19 @@
 | **Эстетика GUI** | 8/10 | 10/10 | +20% |
 | **Доступность** | 5/10 | 7/10 | +20% |
 
-### Вот красивое оформление для пункта 4.2 в едином стиле:
+### 4.2. Визуализация улучшений
 
-## 4.2. Визуализация улучшений
+<div align="center">
+Атрибут	Оценка до	Оценка после	Визуализация
+Распознаваемость	6	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 60%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 30%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Обучаемость	5	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 50%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 40%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Используемость	7	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 70%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Защита от ошибок	4	7	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 40%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 30%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Эстетика GUI	8	10	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 80%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Доступность	5	7	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 50%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
+</div>
 
-Атрибут	До	После	Визуализация
-🔍 Распознаваемость	6/10	9/10	⬛⬛⬛⬛⬛⬛⬛⬛⬛⬜ (+3)
-📚 Обучаемость	5/10	9/10	⬛⬛⬛⬛⬛⬛⬛⬛⬛⬜ (+4)
-⚡ Используемость	7/10	9/10	⬛⬛⬛⬛⬛⬛⬛⬛⬛⬜ (+2)
-🛡️ Защита от ошибок	4/10	7/10	⬛⬛⬛⬛⬛⬛⬛⬜⬜⬜ (+3)
-🎨 Эстетика GUI	8/10	10/10	⬛⬛⬛⬛⬛⬛⬛⬛⬛⬛ (+2)
-♿ Доступность	5/10	7/10	⬛⬛⬛⬛⬛⬛⬛⬜⬜⬜ (+2)
-⬛ — достигнутый результат | ⬜ — потенциал для улучшения
+**Общий прирост качества: +37%**
 
 ---
 
@@ -340,5 +341,9 @@ https://github.com/[username]/siamlacorns/commit/c3d4e5f
 | Умный поиск | `[Скриншот]` |
 | Фильтры | `[Скриншот]` |
 | Анимации | `[Скриншот]` |
+
+---
+
+**[Ссылка на репозиторий с изменениями]**
 
 ---
