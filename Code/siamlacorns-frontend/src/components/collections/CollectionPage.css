@@ -264,3 +264,40 @@
 .leave-page-button {
   /* Все стили меню из Home.css */
 }
+
+/* Добавить в CollectionPage.css */
+.collection-container {
+  min-height: 200px;
+  transition: all 0.3s ease;
+}
+
+.collection-container.drop-target {
+  background: rgba(255, 107, 107, 0.1);
+  border: 3px dashed #ff6b6b;
+  transform: scale(1.02);
+}
+
+.collection-container.can-drop {
+  border: 3px dashed #4CAF50;
+}
+
+.lacorn-item.dragging {
+  cursor: grabbing;
+  transform: rotate(2deg) scale(0.95);
+}
+
+.drop-indicator {
+  text-align: center;
+  padding: 1rem;
+  background: #ff6b6b;
+  color: white;
+  border-radius: 8px;
+  margin: 1rem;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

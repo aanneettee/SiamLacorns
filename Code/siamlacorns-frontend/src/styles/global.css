@@ -193,3 +193,23 @@ input, textarea {
     display: block;
   }
 }
+
+/* Добавить в global.css */
+.confetti {
+  position: fixed;
+  top: -10%;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}

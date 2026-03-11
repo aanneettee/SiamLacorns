@@ -1,10 +1,12 @@
-// Home.js - с функциональностью фильтрации и поиска по имени
+// Home.js - с новыми улучшениями UX
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Home.css';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
 import { lacornService } from '../../services/lacorns';
+import OnboardingTour from '../onboarding/OnboardingTour';
+import SmartSearch from '../search/SmartSearch';
+import SmartCat from '../common/SmartCat';
 
 const Home = () => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -19,6 +21,11 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [filtersApplied, setFiltersApplied] = useState(false);
     const [searchApplied, setSearchApplied] = useState(false);
+    const [isFirstVisit, setIsFirstVisit] = useState(() => {
+        return !localStorage.getItem('hasVisitedBefore');
+    });
+    const [catMood, setCatMood] = useState('neutral');
+    const [catMessage, setCatMessage] = useState('Привет! Я космический кот!');
 
     const { user, token } = useAuth();
     const navigate = useNavigate();
@@ -28,102 +35,124 @@ const Home = () => {
         fetchPopularLacorns();
     }, []);
 
+    // Обновление настроения кота в зависимости от действий
+    useEffect(() => {
+        if (loading) {
+            setCatMood('thinking');
+            setCatMessage('Ищу для тебя лучшие лакорны...');
+        } else if (error) {
+            setCatMood('sad');
+            setCatMessage('Ой! Что-то пошло не так...');
+        } else if (filteredLacorns.length === 0) {
+            setCatMood('sad');
+            setCatMessage('Ничего не нашлось... Попробуй изменить поиск!');
+        } else {
+            setCatMood('happy');
+            setCatMessage(`Нашел ${filteredLacorns.length} лакорнов! Отличный выбор!`);
+        }
+    }, [loading, error, filteredLacorns]);
+
     // Функция для загрузки популярных лакорнов
     const fetchPopularLacorns = async () => {
         try {
             setLoading(true);
             setError(null);
+            setCatMood('thinking');
+            setCatMessage('Загружаю популярные лакорны...');
 
-            const config = {
-                headers: {
-                    ...(token && { Authorization: `Bearer ${token}` }),
-                    ...(user?.id && { 'X-User-Id': user.id.toString() })
-                }
-            };
-
-            // ИСПОЛЬЗУЙТЕ сервис вместо прямого axios
             const lacornsData = await lacornService.getPopularLacorns(0, 20, token, user?.id);
 
-            // Обработка данных...
             setPopularLacorns(lacornsData);
             setFilteredLacorns(lacornsData);
+
+            setCatMood('happy');
+            setCatMessage(`Ура! Загружено ${lacornsData.length} популярных лакорнов!`);
 
         } catch (err) {
             console.error('Error loading popular lacorns:', err);
             setError(err.response?.data?.message || 'Failed to load lacorns');
+            setCatMood('sad');
+            setCatMessage('Не удалось загрузить лакорны... Попробуй еще раз!');
         } finally {
             setLoading(false);
         }
     };
 
-    // Функция поиска по имени (вызывается при нажатии Enter)
-    const handleSearch = () => {
-        if (!searchQuery.trim()) {
-            // Если поисковый запрос пустой, показываем все лакорны
+    // Функция поиска по имени
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+
+        if (!query.trim()) {
             setFilteredLacorns(popularLacorns);
             setSearchApplied(false);
             setFiltersApplied(false);
+            setCatMood('happy');
+            setCatMessage('Показываю все популярные лакорны!');
             return;
         }
 
         const searchResults = popularLacorns.filter(lacorn =>
-            lacorn.title?.toLowerCase().includes(searchQuery.toLowerCase())
+            lacorn.title?.toLowerCase().includes(query.toLowerCase())
         );
 
         setFilteredLacorns(searchResults);
         setSearchApplied(true);
-        setFiltersApplied(false); // Сбрасываем флаг фильтров при поиске
-    };
+        setFiltersApplied(false);
 
-    // Обработчик нажатия клавиши в поле поиска
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleSearch();
+        if (searchResults.length === 0) {
+            setCatMood('sad');
+            setCatMessage(`Ничего не нашел по запросу "${query}"...`);
+        } else {
+            setCatMood('happy');
+            setCatMessage(`Нашел ${searchResults.length} лакорнов по запросу "${query}"!`);
         }
     };
 
     // Функция применения фильтров
     const applyFilters = () => {
         if (!searchQuery && !selectedGenre && !selectedYear && !selectedStatus && !selectedVoicecover) {
-            // Если фильтры не выбраны, показываем все лакорны
             setFilteredLacorns(popularLacorns);
             setFiltersApplied(false);
             setSearchApplied(false);
+            setCatMood('happy');
+            setCatMessage('Показываю все популярные лакорны!');
             return;
         }
 
         const filtered = popularLacorns.filter(lacorn => {
-            // Проверка поискового запроса
             const matchesSearch = !searchQuery ||
                 lacorn.title?.toLowerCase().includes(searchQuery.toLowerCase());
 
-            // Проверка жанра (хотя бы один жанр должен совпадать)
             const matchesGenre = !selectedGenre ||
                 (lacorn.genres && lacorn.genres.some(genre =>
                     genre.toLowerCase() === selectedGenre.toLowerCase()
                 ));
 
-            // Проверка года
             const matchesYear = !selectedYear ||
                 lacorn.releaseYear?.toString() === selectedYear;
 
-            // Проверка статуса
             const matchesStatus = !selectedStatus ||
                 lacorn.status?.toLowerCase() === selectedStatus.toLowerCase();
 
-            // Проверка озвучки
             const matchesVoicecover = !selectedVoicecover ||
                 (lacorn.availableVoiceovers && lacorn.availableVoiceovers.some(voiceover =>
                     voiceover.toLowerCase().includes(selectedVoicecover.toLowerCase())
                 ));
 
-            // Возвращаем true только если все примененные фильтры совпадают
             return matchesSearch && matchesGenre && matchesYear && matchesStatus && matchesVoicecover;
         });
 
         setFilteredLacorns(filtered);
         setFiltersApplied(true);
-        setSearchApplied(false); // Сбрасываем флаг поиска при применении фильтров
+        setSearchApplied(false);
+
+        if (filtered.length === 0) {
+            setCatMood('sad');
+            setCatMessage('По таким фильтрам ничего не нашлось...');
+        } else {
+            setCatMood('happy');
+            setCatMessage(`Нашел ${filtered.length} лакорнов по фильтрам!`);
+        }
     };
 
     const clearFilters = () => {
@@ -135,7 +164,8 @@ const Home = () => {
         setFilteredLacorns(popularLacorns);
         setFiltersApplied(false);
         setSearchApplied(false);
-        console.log('Filters cleared');
+        setCatMood('happy');
+        setCatMessage('Фильтры сброшены! Смотри все лакорны!');
     };
 
     // Функция для возврата ко всем лакорнам
@@ -144,6 +174,16 @@ const Home = () => {
         setFiltersApplied(false);
         setSearchApplied(false);
         setSearchQuery('');
+        setCatMood('happy');
+        setCatMessage('Показываю все популярные лакорны!');
+    };
+
+    // Обработчик завершения онбординга
+    const handleOnboardingComplete = () => {
+        localStorage.setItem('hasVisitedBefore', 'true');
+        setIsFirstVisit(false);
+        setCatMood('happy');
+        setCatMessage('Отлично! Теперь ты знаешь все фишки!');
     };
 
     // Функции для меню
@@ -158,31 +198,36 @@ const Home = () => {
     const handleMainPage = () => {
         closeMenu();
         window.scrollTo(0, 0);
-        // Перезагружаем данные при возврате на главную
         fetchPopularLacorns();
+        setCatMood('happy');
+        setCatMessage('С возвращением на главную!');
     };
 
     const handleProfile = () => {
         closeMenu();
-        console.log('Home.js: Profile button clicked, user:', user);
-
         if (user && user.id) {
-            console.log('Home.js: User is authenticated, navigating to profile');
             navigate('/profile');
+            setCatMood('happy');
+            setCatMessage('Заглянем в твой профиль!');
         } else {
-            console.log('Home.js: User is NOT authenticated, navigating to login');
             navigate('/login', {
                 state: {
                     message: 'Please log in to access your profile',
                     from: { pathname: '/profile' }
                 }
             });
+            setCatMood('thinking');
+            setCatMessage('Сначала нужно войти в аккаунт!');
         }
     };
 
     const handleLeavePage = () => {
-        // Здесь можно добавить логику для выхода или перехода на другую страницу
-        alert('Leave page functionality would go here!');
+        if (window.confirm('Точно хочешь выйти?')) {
+            localStorage.removeItem('token');
+            navigate('/login');
+            setCatMood('sad');
+            setCatMessage('До встречи! Возвращайся скорее!');
+        }
         closeMenu();
     };
 
@@ -196,7 +241,8 @@ const Home = () => {
         if (loading) {
             return (
                 <div className="loading-state">
-                    <p>Loading popular lacorns...</p>
+                    <div className="loading-spinner"></div>
+                    <p>Загружаю лакорны...</p>
                 </div>
             );
         }
@@ -204,22 +250,21 @@ const Home = () => {
         if (error) {
             return (
                 <div className="error-state">
-                    <p>{error}</p>
+                    <p>😿 {error}</p>
                     <button
                         onClick={fetchPopularLacorns}
                         className="retry-button"
                     >
-                        Try Again
+                        Попробовать снова
                     </button>
                 </div>
             );
         }
 
-        // Проверка на пустой результат поиска
         if (searchApplied && filteredLacorns.length === 0) {
             return (
                 <div className="empty-state">
-                    <p>По вашему запросу "{searchQuery}" ничего не найдено</p>
+                    <p>😕 По вашему запросу "{searchQuery}" ничего не найдено</p>
                     <button
                         onClick={showAllLacorns}
                         className="retry-button"
@@ -230,16 +275,15 @@ const Home = () => {
             );
         }
 
-        // Проверка на пустой результат фильтрации
         if (filtersApplied && filteredLacorns.length === 0) {
             return (
                 <div className="empty-state">
-                    <p>По вашему запросу ничего не найдено</p>
+                    <p>😕 По вашему запросу ничего не найдено</p>
                     <button
                         onClick={clearFilters}
                         className="retry-button"
                     >
-                        Показать все лакорны
+                        Сбросить фильтры
                     </button>
                 </div>
             );
@@ -250,12 +294,12 @@ const Home = () => {
         if (lacornsToDisplay.length === 0) {
             return (
                 <div className="empty-state">
-                    <p>No popular lacorns found.</p>
+                    <p>😿 Пока нет лакорнов</p>
                     <button
                         onClick={fetchPopularLacorns}
                         className="retry-button"
                     >
-                        Refresh
+                        Обновить
                     </button>
                 </div>
             );
@@ -263,12 +307,16 @@ const Home = () => {
 
         return (
             <div className="lacorns-grid">
-                {lacornsToDisplay.map(lacorn => (
+                {lacornsToDisplay.map((lacorn, index) => (
                     <div
                         key={lacorn.id}
                         className="lacorn-item"
-                        onClick={() => navigate(`/watch/${lacorn.id}`)}
-                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                            navigate(`/watch/${lacorn.id}`);
+                            setCatMood('happy');
+                            setCatMessage(`Смотрим ${lacorn.title}! Отличный выбор!`);
+                        }}
+                        style={{ cursor: 'pointer', animation: `fadeInUp 0.5s ease ${index * 0.05}s both` }}
                     >
                         <div className="lacorn-poster">
                             <img
@@ -285,6 +333,7 @@ const Home = () => {
                             </div>
                         </div>
                         <h3 className="lacorn-title">{lacorn.title}</h3>
+                        <p className="lacorn-year">{lacorn.releaseYear}</p>
                     </div>
                 ))}
             </div>
@@ -296,9 +345,9 @@ const Home = () => {
         if (searchApplied) {
             return `Результаты поиска по "${searchQuery}":`;
         } else if (filtersApplied) {
-            return 'Результаты поиска:';
+            return 'Результаты фильтрации:';
         } else {
-            return 'Popular:';
+            return 'Популярные лакорны:';
         }
     };
 
@@ -310,10 +359,15 @@ const Home = () => {
                         src="/images/Space cat.png"
                         alt="Space Cat"
                         className="header-cat"
+                        onClick={() => {
+                            setCatMood('surprised');
+                            setCatMessage('Мяу! Не щекочи!');
+                            setTimeout(() => setCatMood('happy'), 2000);
+                        }}
                     />
                     <div className="help-bubble">
-                        <p>Need help?</p>
-                        <p>Click <Link to="/help" className="help-link">here</Link> :3</p>
+                        <p>Нужна помощь?</p>
+                        <p>Нажми <Link to="/help" className="help-link">сюда</Link> :3</p>
                     </div>
                 </div>
                 <div className="site-title-section">
@@ -326,19 +380,15 @@ const Home = () => {
                         <span className="menu-line"></span>
                         <span className="menu-line"></span>
                     </div>
-                    Menu
+                    Меню
                 </button>
             </header>
 
             <main className="home-main">
                 <div className="search-section">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder="Search by name (press Enter to search)"
-                        className="search-input"
+                    <SmartSearch
+                        onSearch={handleSearch}
+                        placeholder="Поиск лакорнов по названию..."
                     />
                 </div>
 
@@ -347,7 +397,7 @@ const Home = () => {
                         <button
                             className="filter-button"
                             onClick={applyFilters}
-                            title="Apply filters"
+                            title="Применить фильтры"
                         >
                             🔍
                         </button>
@@ -358,7 +408,7 @@ const Home = () => {
                                 onChange={(e) => setSelectedGenre(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">Genre</option>
+                                <option value="">Жанр</option>
                                 {genres.map(genre => (
                                     <option key={genre} value={genre}>{genre}</option>
                                 ))}
@@ -371,7 +421,7 @@ const Home = () => {
                                 onChange={(e) => setSelectedYear(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">Year</option>
+                                <option value="">Год</option>
                                 {years.map(year => (
                                     <option key={year} value={year}>{year}</option>
                                 ))}
@@ -384,7 +434,7 @@ const Home = () => {
                                 onChange={(e) => setSelectedStatus(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">Status</option>
+                                <option value="">Статус</option>
                                 {statuses.map(status => (
                                     <option key={status} value={status}>{status}</option>
                                 ))}
@@ -397,7 +447,7 @@ const Home = () => {
                                 onChange={(e) => setSelectedVoicecover(e.target.value)}
                                 className="filter-select"
                             >
-                                <option value="">Voicecover</option>
+                                <option value="">Озвучка</option>
                                 {voicecovers.map(voicecover => (
                                     <option key={voicecover} value={voicecover}>{voicecover}</option>
                                 ))}
@@ -407,7 +457,7 @@ const Home = () => {
                         <button
                             className="filter-button"
                             onClick={clearFilters}
-                            title="Clear filters"
+                            title="Сбросить фильтры"
                         >
                             🧹
                         </button>
@@ -428,42 +478,63 @@ const Home = () => {
             {isMenuOpen && (
                 <div className="menu-modal-overlay" onClick={closeMenu}>
                     <div className="menu-modal" onClick={(e) => e.stopPropagation()}>
-                        <h2 className="menu-modal-title">Menu</h2>
+                        <h2 className="menu-modal-title">Меню</h2>
                         <div className="menu-modal-content">
                             <div className="menu-modal-column">
                                 <button className="menu-modal-button" onClick={handleProfile}>
                                     <img src="/images/icons/my-profile.png" alt="Profile" className="menu-modal-button-icon" />
-                                    My profile
+                                    Мой профиль
                                 </button>
-                                <button className="menu-modal-button" onClick={() => navigate('/actors')}>
+                                <button className="menu-modal-button" onClick={() => {
+                                    closeMenu();
+                                    navigate('/actors');
+                                    setCatMood('happy');
+                                    setCatMessage('Смотрим актёров!');
+                                }}>
                                     <img src="/images/icons/actors.png" alt="Actors" className="menu-modal-button-icon" />
-                                    Actors
-                                  </button>
-                                <button className="menu-modal-button"
-                                    onClick={() => navigate('/collections/favourites')}>
-                                    <img src="/images/icons/favourite.png" alt="Favourites" className="menu-modal-button-icon" />
-                                    Favourites
+                                    Актёры
                                 </button>
-                                <button className="menu-modal-button"
-                                    onClick={() => navigate('/collections/watch-later')}>
+                                <button className="menu-modal-button" onClick={() => {
+                                    closeMenu();
+                                    navigate('/collections/favourites');
+                                    setCatMood('happy');
+                                    setCatMessage('Твоё избранное!');
+                                }}>
+                                    <img src="/images/icons/favourite.png" alt="Favourites" className="menu-modal-button-icon" />
+                                    Избранное
+                                </button>
+                                <button className="menu-modal-button" onClick={() => {
+                                    closeMenu();
+                                    navigate('/collections/watch-later');
+                                    setCatMood('thinking');
+                                    setCatMessage('Что посмотрим позже?');
+                                }}>
                                     <img src="/images/icons/watch-later.png" alt="Watch later" className="menu-modal-button-icon" />
-                                    Watch later
+                                    Посмотреть позже
                                 </button>
                             </div>
                             <div className="menu-modal-column">
-                                <button className="menu-modal-button"
-                                    onClick={() => navigate('/collections/started')}>
+                                <button className="menu-modal-button" onClick={() => {
+                                    closeMenu();
+                                    navigate('/collections/started');
+                                    setCatMood('happy');
+                                    setCatMessage('Продолжаем просмотр!');
+                                }}>
                                     <img src="/images/icons/started.png" alt="Started" className="menu-modal-button-icon" />
-                                    Started
+                                    Начатое
                                 </button>
-                                <button className="menu-modal-button"
-                                    onClick={() => navigate('/collections/forsaken')}>
+                                <button className="menu-modal-button" onClick={() => {
+                                    closeMenu();
+                                    navigate('/collections/forsaken');
+                                    setCatMood('sad');
+                                    setCatMessage('Может вернёшься к ним?');
+                                }}>
                                     <img src="/images/icons/forsaken.png" alt="Forsaken" className="menu-modal-button-icon" />
-                                    Forsaken
+                                    Брошенное
                                 </button>
                                 <button className="menu-modal-button" onClick={handleMainPage}>
                                     <img src="/images/icons/main-page.png" alt="Main page" className="menu-modal-button-icon" />
-                                    Main page
+                                    Главная
                                 </button>
                             </div>
                         </div>
@@ -471,12 +542,39 @@ const Home = () => {
                         <div className="menu-modal-footer">
                             <button className="leave-page-button" onClick={handleLeavePage}>
                                 <img src="/images/icons/leave-page.png" alt="Leave page" className="menu-modal-button-icon" />
-                                Leave page
+                                Выйти
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* Онбординг для новых пользователей */}
+            <OnboardingTour
+                isFirstVisit={isFirstVisit}
+                onComplete={handleOnboardingComplete}
+            />
+
+            {/* Умный кот-помощник */}
+            <SmartCat
+                mood={catMood}
+                message={catMessage}
+                position="bottom-left"
+            />
+
+            {/* Добавляем анимацию появления для карточек */}
+            <style jsx>{`
+                @keyframes fadeInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+            `}</style>
         </div>
     );
 };
