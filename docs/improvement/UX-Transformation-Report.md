@@ -247,13 +247,13 @@
 ### 4.2. Визуализация улучшений
 
 <div align="center">
-Атрибут	Оценка до	Оценка после	Визуализация
-Распознаваемость	6	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 60%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 30%; height: 100%; background: #4CAF50; float: left;"></div></div>
-Обучаемость	5	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 50%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 40%; height: 100%; background: #4CAF50; float: left;"></div></div>
-Используемость	7	9	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 70%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
-Защита от ошибок	4	7	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 40%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 30%; height: 100%; background: #4CAF50; float: left;"></div></div>
-Эстетика GUI	8	10	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 80%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
-Доступность	5	7	<div style="width: 200px; height: 20px; background: #f0f0f0; border-radius: 10px; overflow: hidden;"><div style="width: 50%; height: 100%; background: #ff6b6b; float: left;"></div><div style="width: 20%; height: 100%; background: #4CAF50; float: left;"></div></div>
+Атрибут	До	После	Δ	Прогресс-бар	Изменение
+🔍 Распознаваемость соответствия	6/10	9/10	+3	█████████░░ 60% → 90%	📈 +30%
+📚 Обучаемость	5/10	9/10	+4	█████████░░ 50% → 90%	📈 +40%
+⚡ Используемость (операбельность)	7/10	9/10	+2	█████████░░ 70% → 90%	📈 +20%
+🛡️ Защита от ошибок пользователя	4/10	7/10	+3	███████░░░░ 40% → 70%	📈 +30%
+🎨 Эстетика GUI	8/10	10/10	+2	███████████ 80% → 100%	📈 +20%
+♿ Доступность	5/10	7/10	+2	███████░░░░ 50% → 70%	📈 +20%
 </div>
 
 **Общий прирост качества: +37%**
