@@ -189,7 +189,7 @@
 
 | До | После |
 |:--:|:-----:|
-| ![](/docs/improvement/image_UX/12.png) | ![](/docs/improvement/image_UX/10.png) |
+| ![](/docs/improvement/image_UX/12.png) | ![](/docs/improvement/image_UX/01.png) |
 | *Базовое поле ввода* | *Интеллектуальный поиск* |
 
 ### 3.4. Улучшенная система фильтрации
