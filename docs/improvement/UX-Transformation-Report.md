@@ -19,9 +19,9 @@
 
 | Элемент интерфейса | Состояние "До" |
 |--------------------|----------------|
-| **Главная страница** |![](../docs/improvement/image_UX/02.png) |
-| **Поиск** | ![](../docs/improvement/image_UX/12.png) |
-| **Кот-помощник** | ![](../docs/improvement/image_UX/11.png) |
+| **Главная страница** |![](/docs/improvement/image_UX/02.png) |
+| **Поиск** | ![](/docs/improvement/image_UX/12.png) |
+| **Кот-помощник** | ![](/docs/improvement/image_UX/11.png) |
 
 ---
 
